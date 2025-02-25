@@ -22,10 +22,12 @@ return new class extends Migration
             $table->decimal('salary', 10, 2)->nullable();
             $table->enum('employment_type', ['full-time', 'part-time', 'contract'])->nullable(); // ENUM
             $table->text('notes')->nullable(); // Any additional notes about the employee
-            $table->unsignedBigInteger('user_id')->nullable(); // Foreign key to users table (if employees are also users)
+            $table->uuid('user_id')->nullable();
+            $table->uuid('animal_id');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users'); // If employees are also users
+            $table->foreign('animal_id')->references('id')->on('animals')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             // Add indexes
             $table->index('first_name');

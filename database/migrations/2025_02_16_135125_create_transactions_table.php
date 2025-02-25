@@ -16,8 +16,7 @@ return new class extends Migration
             $table->uuid('seller_id')->nullable(); // If seller is a registered user
             $table->uuid('buyer_id')->nullable();  // If buyer is a registered user
 
-            // Farm Reference (optional)
-            $table->uuid('farm_id')->nullable(); // The farm managing this transaction
+            // Farm Reference removed as requested
 
             // Transaction Details
             $table->enum('transaction_type', [
@@ -119,7 +118,6 @@ return new class extends Migration
             $table->foreign('animal_id')->references('id')->on('animals')->onDelete('cascade');
             $table->foreign('seller_id')->references('id')->on('users');
             $table->foreign('buyer_id')->references('id')->on('users');
-            $table->foreign('farm_id')->references('id')->on('farms');
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
 
@@ -127,7 +125,6 @@ return new class extends Migration
             $table->index('animal_id');
             $table->index('seller_id');
             $table->index('buyer_id');
-            $table->index('farm_id');
             $table->index('transaction_type');
             $table->index('transaction_date');
             $table->index('transaction_status');

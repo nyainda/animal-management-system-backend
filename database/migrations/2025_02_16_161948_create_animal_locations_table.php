@@ -33,11 +33,7 @@ return new class extends Migration
             $table->index(['animal_id', 'recorded_at']); // Index for efficient queries
         });
 
-        Schema::table('animals', function (Blueprint $table) {
-            $table->unsignedBigInteger('current_location_id')->nullable(); // Add this line
 
-            $table->foreign('current_location_id')->references('id')->on('animal_locations')->onDelete('set null'); // Add this line
-        });
     }
 
     /**

@@ -82,7 +82,7 @@ return new class extends Migration
             $table->uuid('parent_event_id')->nullable();
 
             // Integration with other modules
-            $table->uuid('health_record_id')->nullable();
+            // Removed health_record_id
             $table->uuid('task_id')->nullable();
             $table->uuid('breeding_id')->nullable();
             $table->uuid('feed_schedule_id')->nullable();
@@ -116,14 +116,8 @@ return new class extends Migration
             $table->foreign('animal_id')->references('id')->on('animals')->onDelete('cascade');
             $table->foreign('event_type_id')->references('id')->on('calendar_event_types')->onDelete('restrict');
             $table->foreign('recurrence_pattern_id')->references('id')->on('calendar_recurrence_patterns')->onDelete('set null');
-            $table->foreign('parent_event_id')->references('id')->on('calendar_events')->onDelete('cascade');
-            $table->foreign('health_record_id')->references('id')->on('health')->onDelete('set null');
-            $table->foreign('task_id')->references('id')->on('tasks')->onDelete('set null');
-            $table->foreign('breeding_id')->references('id')->on('breedings')->onDelete('set null');
-            $table->foreign('feed_schedule_id')->references('id')->on('feeding_schedules')->onDelete('set null');
-            $table->foreign('feed_record_id')->references('id')->on('feeding_records')->onDelete('set null');
-            $table->foreign('yield_record_id')->references('id')->on('yield_records')->onDelete('set null');
-            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
+
+            // User references
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
             $table->foreign('completed_by')->references('id')->on('users');
@@ -177,6 +171,40 @@ return new class extends Migration
                   ->on('users')
                   ->onDelete('cascade');
             $table->unique(['event_id', 'user_id']);
+        });
+
+        // Add the self-referencing foreign key after the table is created
+        Schema::table('calendar_events', function (Blueprint $table) {
+            // Add self-referencing foreign key for parent_event_id
+            $table->foreign('parent_event_id')
+                ->references('id')
+                ->on('calendar_events')
+                ->onDelete('cascade');
+
+            // Add conditional foreign keys for other modules
+            if (Schema::hasTable('tasks')) {
+                $table->foreign('task_id')->references('id')->on('tasks')->onDelete('set null');
+            }
+
+            if (Schema::hasTable('breedings')) {
+                $table->foreign('breeding_id')->references('id')->on('breedings')->onDelete('set null');
+            }
+
+            if (Schema::hasTable('feeding_schedules')) {
+                $table->foreign('feed_schedule_id')->references('id')->on('feeding_schedules')->onDelete('set null');
+            }
+
+            if (Schema::hasTable('feeding_records')) {
+                $table->foreign('feed_record_id')->references('id')->on('feeding_records')->onDelete('set null');
+            }
+
+            if (Schema::hasTable('yield_records')) {
+                $table->foreign('yield_record_id')->references('id')->on('yield_records')->onDelete('set null');
+            }
+
+            if (Schema::hasTable('suppliers')) {
+                $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
+            }
         });
     }
 

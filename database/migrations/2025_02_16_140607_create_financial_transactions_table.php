@@ -13,32 +13,32 @@ return new class extends Migration
     {
         Schema::create('financial_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('transaction_type'); // 'income' (sale) or 'expense' (ENUM recommended)
+            $table->enum('transaction_type', ['income', 'expense']); // Using enum instead of string
             $table->date('transaction_date');
+            $table->uuid('animal_id');
             $table->decimal('amount', 10, 2);
             $table->string('description')->nullable(); // Detailed description of the transaction
-            $table->string('category')->nullable(); // e.g., 'feed', 'medication', 'labor', 'veterinary', 'sale', etc. (ENUM)
+            $table->enum('category', ['feed', 'medication', 'labor', 'veterinary', 'sale'])->nullable(); // Using enum instead of string
             $table->uuid('related_id')->nullable(); // Link to other records (e.g., animal sale transaction, purchase record)
-            $table->unsignedBigInteger('user_id')->nullable(); // Who recorded the transaction
+            $table->uuid('user_id')->nullable(); // Who recorded the transaction
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
+            // Foreign key constraints
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('animal_id')->references('id')->on('animals')->onDelete('restrict');
 
-             $table->index('transaction_type');
-             $table->index('transaction_date');
-             $table->index('category');
-             $table->index('user_id');
+            // Indexes
+            $table->index('transaction_type');
+            $table->index('transaction_date');
+            $table->index('category');
+            $table->index('user_id');
+        });
 
-             // Example:  Linking to Animal Sale (If you have a separate sales table)
-Schema::table('financial_transactions', function (Blueprint $table) {
-    $table->foreign('related_id')->references('id')->on('transactions')->onDelete('set null'); // Set null on delete for sales transaction
-});
-
-
-//Example: Linking to Inventory Purchases (If you have a separate purchases table)
-Schema::table('financial_transactions', function (Blueprint $table) {
-    $table->foreign('related_id')->references('id')->on('inventory_movements')->onDelete('set null'); // Set null on delete for purchases
-});
+        // Add polymorphic relationship for related_id
+        // This allows relating to different tables based on a type column
+        Schema::table('financial_transactions', function (Blueprint $table) {
+            $table->string('related_type')->nullable()->after('related_id');
+            $table->index(['related_id', 'related_type']);
         });
     }
 
@@ -49,5 +49,4 @@ Schema::table('financial_transactions', function (Blueprint $table) {
     {
         Schema::dropIfExists('financial_transactions');
     }
-
 };
