@@ -1,0 +1,271 @@
+openapi: 3.0.0
+info:
+  title: CoachTribe User Authentication and Management API
+  version: 1.0.0
+  description: |
+    Comprehensive API for user authentication, registration, and management in the CoachTribe platform.
+    Key Features:
+    - User registration for administrators, coaches, and coachees
+    - Secure authentication and authorization
+    - Password management (reset, forgot password)
+    - User settings and contact information retrieval
+    - Coach and coachee profile management
+    - Rate management for coaching services
+  contact:
+    name: CoachTribe Development Team
+    email: chiraz@pitchworldfast.com
+  termsOfService: www.coachtribe.com
+  license:
+    name: Proprietary License
+    url: www.coachtribe.com
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/bruceoyugi/coachtribe/1.0.0
+  - url: https://www.coachtribe.com/api
+    description: Production server
+  - url: https://www.coachtribe.com/api
+    description: Staging server
+  - url: http://127.0.0.1:8000/api
+    description: Local development server
+tags:
+  - name: Authentication
+    description: User registration, login, and account management
+  - name: Settings
+    description: User profile and application settings
+  - name: Contact Info
+    description: User contact information management
+  - name: Coaches
+    description: Coach profile and management endpoints
+  - name: Coachees
+    description: Coachee profile and management endpoints
+  - name: Rates
+    description: Coaching service rate management
+  - name: Referral
+    description: API for managing referrals with admin access
+  - name: File Resource
+    description: API for managing file resources
+  - name: Chat
+    description: API for managing Chat
+  - name: Meeting
+    description: API for managing meeting
+  - name: User Information
+    description: API for managing User Information
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistrationResponse'
+        '400':
+          description: Bad request - Invalid registration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Other paths remain unchanged...
+
+  /api/chats/upload-voice:
+    post:
+      tags:
+        - Chat
+      summary: Upload a Voice Message
+      description: Upload a voice message to a conversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceMessageRequest'
+      responses:
+        '200':
+          description: Voice message uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoiceMessageResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT (JSON Web Token) authentication.
+
+  schemas:
+    UserRegistrationRequest:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - password_confirmation
+        - user_role
+      properties:
+        first_name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's first name
+        last_name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's last name
+        email:
+          type: string
+          format: email
+          description: Unique email address for user registration
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: User password with complexity requirements
+        password_confirmation:
+          type: string
+          description: Must match the password field
+        user_role:
+          type: string
+          enum:
+            - administrator
+            - coach
+            - coachee
+          description: Role determines user's access and capabilities
+
+    VoiceMessageRequest:
+      type: object
+      required:
+        - audio_blob
+        - duration
+        - conversation_id
+        - receiver_id
+      properties:
+        audio_blob:
+          type: string
+          format: byte
+          description: Base64 encoded audio data
+        duration:
+          type: integer
+          description: Duration in seconds
+        conversation_id:
+          type: string
+          format: uuid
+        receiver_id:
+          type: string
+          format: uuid
+
+    VoiceMessageResponse:
+      allOf:
+        - $ref: '#/components/schemas/MessageResponse'
+      properties:
+        data:
+          type: object
+          properties:
+            files:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChatFile'
+
+    ChatFile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileUid:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+        fileUrl:
+          type: string
+        duration:
+          type: integer
+          description: Duration in seconds (for audio/video files)
+
+    # Other schemas remain unchanged...
+
+    {
+  "product_category": {
+    "name": "Milk",
+    "measurement_unit": "liters",
+    "description": "Fresh dairy milk"
+  },
+  "product_grade": {
+    "name": "Grade A",
+    "description": "Premium quality milk",
+    "price_modifier": 1.2
+  },
+ "production_method": {
+    "method_name": "Organic Farming",
+    "description": "Cultivation without synthetic pesticides or fertilizers.",
+    "requires_certification": true,
+    "is_active": true
+  },
+  "collector": {
+    "name": "John Doe",
+    "contact_info": "+1234567890"
+  },
+  "storage_location": {
+    "name": "Cold Storage Unit 1",
+    "description": "Temperature controlled storage.",
+    "storage_conditions": ["temperature-controlled", "humidity-controlled"],
+    "is_active": true
+  },
+  "quantity": 15.5,
+  "price_per_unit": 2.50,
+  "total_price":400,
+  "production_date": "2025-02-10",
+  "production_time": "07:30",
+  "quality_status": "Passed",
+  "quality_notes": "Normal consistency and color",
+  "trace_number": "TN2025021001",
+  "weather_conditions": {
+    "temperature": 22.5,
+    "humidity": 65
+  },
+  "storage_conditions": {
+    "temperature": 4,
+    "humidity": 85
+  },
+  "is_organic": true,
+  "certification_number": "ORG123456",
+  "additional_attributes": {
+    "fat_content": "3.5%",
+    "protein_content": "3.2%"
+  },
+  "notes": "Morning milking session"
+}

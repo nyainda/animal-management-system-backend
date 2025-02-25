@@ -1,0 +1,2362 @@
+openapi: 3.0.0
+info:
+  title: CoachTribe User Authentication and Management API
+  version: 1.0.0
+  description: |
+    Comprehensive API for user authentication, registration, and management in the CoachTribe platform.
+    
+    Key Features:
+    - User registration for administrators, coaches, and coachees
+    - Secure authentication and authorization
+    - Password management (reset, forgot password)
+    - User settings and contact information retrieval
+    - Coach and coachee profile management
+    - Rate management for coaching services
+
+  contact:
+    name: CoachTribe Development Team
+    email: chiraz@pitchworldfast.com
+  
+  termsOfService: www.coachtribe.com
+  
+  license:
+    name: Proprietary License
+    url: www.coachtribe.com
+
+servers:
+  
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/bruceoyugi/coachtribe/1.0.0
+  - url: https://www.coachtribe.com/api
+    description: Production server
+  - url: https://www.coachtribe.com/api
+    description: Staging server
+  - url: http://127.0.0.1:8000/api
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User registration, login, and account management
+  - name: Settings
+    description: User profile and application settings
+  - name: Contact Info
+    description: User contact information management
+  - name: Coaches
+    description: Coach profile and management endpoints
+  - name: Coachees
+    description: Coachee profile and management endpoints
+  - name: Rates
+    description: Coaching service rate management
+  - name: Referral
+    description: API for managing referrals with admin access
+  - name: File Resource
+    description: API for managing referrals with admin access
+  - name: Chat
+    description: API for managing Chat
+  - name: Meeting
+    description: API for managing meeting
+  - name: User Information
+    description: API for managing User Information
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: |
+        Registers a user in the system with one of three roles:
+        - Administrator: Platform management
+        - Coach: Professional coaching services provider
+        - Coachee: Individual seeking coaching
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+            examples:
+              administrator:
+                summary: Administrator registration example
+                value:
+                  first_name: "Admin"
+                  last_name: "User"
+                  email: "admin@coachtribe.com"
+                  password: "SecureAdminPass123!"
+                  password_confirmation: "SecureAdminPass123!"
+                  user_role: "administrator"
+              coach:
+                summary: Coach registration example
+                value:
+                  first_name: "John"
+                  last_name: "Professional"
+                  email: "coach@coachtribe.com"
+                  password: "CoachExpert456!"
+                  password_confirmation: "CoachExpert456!"
+                  user_role: "coach"
+              coachee:
+                summary: Coachee registration example
+                value:
+                  first_name: "Jane"
+                  last_name: "Learner"
+                  email: "coachee@coachtribe.com"
+                  password: "PersonalGrowth789!"
+                  password_confirmation: "PersonalGrowth789!"
+                  user_role: "coachee"
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistrationResponse'
+        '400':
+          description: Bad request - Invalid registration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: User Authentication
+      description: |
+        Authenticate users with email and password.
+        Supports login for administrators, coaches, and coachees.
+        Returns a JWT token for subsequent authenticated requests.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's registered email address
+                password:
+                  type: string
+                  description: User's account password
+                  format: password
+            examples:
+              coachee_login:
+                summary: Coachee login credentials
+                value:
+                  email: "jane.learner@coachtribe.com"
+                  password: "SecurePass123!"
+              coach_login:
+                summary: Coach login credentials
+                value:
+                  email: "john.professional@coachtribe.com"
+                  password: "CoachExpert456!"
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT authentication token
+                      user:
+                        $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      summary: User Logout
+      description: |
+        Invalidate the current user's authentication token.
+        Ensures secure logout by preventing further use of the current token.
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged out successfully"
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: boolean
+                    example: true
+
+  /api/auth/forgot-password:
+    post:
+      summary: Initiate Password Reset
+      description: |
+        Send a password reset link to the user's registered email.
+        Helps users recover access to their account.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Registered email address
+            examples:
+              forgot_password:
+                value:
+                  email: "jane.learner@coachtribe.com"
+      responses:
+        '200':
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset instructions sent to your email"
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: boolean
+                    example: true
+        '404':
+          description: Email not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/reset-password:
+    post:
+      summary: Complete Password Reset
+      description: |
+        Reset user password using a valid reset token.
+        Requires email, reset token, and new password.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - token
+                - password
+                - password_confirmation
+              properties:
+                email:
+                  type: string
+                  format: email
+                token:
+                  type: string
+                  description: Password reset token received via email
+                password:
+                  type: string
+                  minLength: 8
+                  description: New password meeting complexity requirements
+                password_confirmation:
+                  type: string
+                  description: Must match the new password
+            examples:
+              reset_password:
+                value:
+                  email: "jane.learner@coachtribe.com"
+                  token: "unique_reset_token_123456"
+                  password: "NewSecurePass789!"
+                  password_confirmation: "NewSecurePass789!"
+      responses:
+        '200':
+          description: Password successfully reset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset successful"
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid reset request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/user-settings:
+    get:
+      summary: Retrieve Complete User Settings
+      description: |
+        Fetch all user settings for the authenticated user.
+        Provides comprehensive user preferences and configuration.
+      tags:
+        - Settings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User settings retrieved"
+                  data:
+                    $ref: '#/components/schemas/UserSettings'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Update User Settings
+      description: |
+        Partially update user settings for the authenticated user.
+        Allows updating specific settings without modifying the entire configuration.
+      tags:
+        - Settings
+      operationId: updateUserSettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettingsUpdateRequest'
+      responses:
+        '200':
+          description: User settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User settings updated successfully"
+                  data:
+                    $ref: '#/components/schemas/UserSettings'
+        '400':
+          description: Bad request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/user-settings/{field}:
+    get:
+      summary: Retrieve specific user setting
+      description: Use token to get a specific user setting (e.g., visibility, language).
+      operationId: getUserSettingField
+      tags:
+        - Settings
+      parameters:
+        - name: field
+          in: path
+          required: true
+          description: The specific user setting field to retrieve (e.g., visibility, default_language).
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User setting retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Settings retrieved successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      visibility:
+                        type: string
+                        nullable: true
+                      default_language:
+                        type: string
+                        nullable: true
+                      date_of_birth:
+                        type: string
+                        nullable: true
+                      currency:
+                        type: string
+                        nullable: true
+                      gender:
+                        type: string
+                        nullable: true
+                      pronouns:
+                        type: string
+                        nullable: true
+                      time_clock:
+                        type: string
+                        nullable: true
+                      calender_format:
+                        type: string
+                        nullable: true
+                      sync_calender:
+                        type: boolean
+                        example: false
+        '401':
+          description: Unauthorized - Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: "error"
+        '404':
+          description: User setting not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User setting not found."
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: "error"
+  /api/contact-info:
+    get:
+      summary: Get all contact information for the authenticated user.
+      description: Retrieve contact information for the authenticated user (coach, admin, coachee) using a token.
+      operationId: getContactInfo
+      tags:
+        - Contact Info
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Contact information retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Contact information retrieved successfully.
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      first_name:
+                        type: string
+                        example: Bruce
+                      last_name:
+                        type: string
+                        example: Dick
+                      email:
+                        type: string
+                        example: john.38doe@example.com
+                      address:
+                        type: string
+                        nullable: true
+                        example: null
+                      time_zone:
+                        type: string
+                        nullable: true
+                        example: null
+                      area_code:
+                        type: string
+                        nullable: true
+                        example: null
+                      country_code:
+                        type: string
+                        nullable: true
+                        example: null
+                      phone_number:
+                        type: string
+                        nullable: true
+                        example: null
+                      country:
+                        type: string
+                        nullable: true
+                        example: null
+                      communication_method:
+                        type: string
+                        nullable: true
+                        example: null
+    patch:
+      summary: Update contact information for the authenticated user
+      description: Partially update user contact information using a token
+      operationId: updateContactInfo
+      tags:
+        - Contact Info
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInfoUpdateRequest'
+      responses:
+        '200':
+          description: Contact information updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Contact information updated successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    $ref: '#/components/schemas/ContactInfoResponse/properties/data'
+        '400':
+          description: Bad request - Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'                    
+  /api/contact-info/{field}:
+    get:
+      summary: Get specific contact information for the authenticated user.
+      description: Retrieve specific contact information (based on `field` such as admin, coach, coachee) using a token.
+      operationId: getSpecificContactInfo
+      tags:
+        - Contact Info
+      parameters:
+        - name: field
+          in: path
+          required: true
+          description: The field to retrieve contact information for (e.g., admin, coach, coachee).
+          schema:
+            type: string
+            enum: [admin, coach, coachee]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Specific contact information retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Contact information retrieved successfully.
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      first_name:
+                        type: string
+                        example: Bruce
+                      last_name:
+                        type: string
+                        example: Dick
+                      email:
+                        type: string
+                        example: john.38doe@example.com
+                      address:
+                        type: string
+                        nullable: true
+                        example: null
+                      time_zone:
+                        type: string
+                        nullable: true
+                        example: null
+                      area_code:
+                        type: string
+                        nullable: true
+                        example: null
+                      country_code:
+                        type: string
+                        nullable: true
+                        example: null
+                      phone_number:
+                        type: string
+                        nullable: true
+                        example: null
+                      country:
+                        type: string
+                        nullable: true
+                        example: null
+                      communication_method:
+                        type: string
+                        nullable: true
+                        example: null                  
+  /api/coachees:
+    get:
+      tags:
+        - Coachees
+      summary: Get a list of coachees
+      description: Retrieve all coachees
+      responses:
+        '200':
+          description: A list of coachees
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_page:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        current_job:
+                          type: string
+                        goal:
+                          type: string
+                        reason_of_coach:
+                          type: string
+                        expectations:
+                          type: string
+                        category_of_coach:
+                          type: string
+                        visibility:
+                          type: integer
+                        user_role:
+                          type: string
+                        gender:
+                          type: string
+                        pronouns:
+                          type: string
+                        date_of_birth:
+                          type: string
+                          format: date
+                        language:
+                          type: string
+                        rate_amount:
+                          type: integer
+                        rate_type:
+                          type: string
+                        rate_currency:
+                          type: string
+                        user_type:
+                          type: string
+                        profile_image:
+                          type: string
+                          nullable: true     
+  /api/coachees/{id}:
+    get:
+      tags:
+        - Coachees
+      summary: Get details of a specific coachee
+      description: Retrieve the details of a specific coachee by their ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the coachee
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Coachee details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  desired_coaching_type:
+                    type: string
+                    nullable: true
+                  desired_transformations:
+                    type: string
+                    nullable: true
+                  motivation_factors:
+                    type: string
+                    nullable: true
+                  success_definition:
+                    type: string
+                    nullable: true
+                  learning_approach:
+                    type: string
+                    nullable: true
+                  visibility:
+                    type: integer
+                  user_type:
+                    type: string
+                  
+  /api/coaches:
+    get:
+      tags:
+        - Coaches
+      summary: Get a list of coaches
+      description: Retrieve all coaches
+      responses:
+        '200':
+          description: A list of coaches
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_page:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        transformations:
+                          type: string
+                        expectations:
+                          type: string
+                        bio:
+                          type: string
+                        teaching_methods:
+                          type: string
+                        success_measure:
+                          type: string
+                        visibility:
+                          type: integer
+                        user_role:
+                          type: string
+                        gender:
+                          type: string
+                        pronouns:
+                          type: string
+                        date_of_birth:
+                          type: string
+                          format: date
+                        language:
+                          type: string
+                        rate_amount:
+                          type: integer
+                        rate_type:
+                          type: string
+                        rate_currency:
+                          type: string
+                        user_type:
+                          type: string
+                        profile_image:
+                          type: string
+                          nullable: true
+  /api/coaches/{id}:
+    get:
+      tags:
+        - Coaches
+      summary: Get details of a specific coach
+      description: Retrieve the details of a specific coach by their ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the coach
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Coach details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transformations:
+                    type: string
+                  expectations:
+                    type: string
+                  bio:
+                    type: string
+                  teaching_methods:
+                    type: string
+                  success_measure:
+                    type: string
+                  visibility:
+                    type: integer
+                  user_role:
+                    type: string
+                  gender:
+                    type: string
+                  pronouns:
+                    type: string
+                  date_of_birth:
+                    type: string
+                    format: date
+                  language:
+                    type: string
+                  rate_amount:
+                    type: integer
+                  rate_type:
+                    type: string
+                  rate_currency:
+                    type: string
+                  user_type:
+                    type: string
+  /api/coach-coachee:
+    get:
+      tags:
+        - coach-coachee
+      summary: Get a list of coach-coachee relationships
+      description: Retrieve all coach-coachee 
+      responses:
+        '200':
+          description: List of coach-coachee relationships
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_page:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        coach_id:
+                          type: string
+                        coachee_id:
+                          type: string
+                        relationship_status:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date
+  /api/rates:
+    post:
+      tags:
+        - Rates
+      summary: Create a new rate
+      description: Create a new rate for a coach. Requires a valid `coach` token.
+      operationId: createRate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Standard Rate"
+                price:
+                  type: number
+                  format: float
+                  example: 100.50
+                description:
+                  type: string
+                  example: "Standard rate for services."
+                currency:
+                  type: string
+                  example: "USD"
+                duration:
+                  type: string
+                  example: "1 hour"
+                earned:
+                  type: string
+                  example: "150.75"
+                coach_id:
+                  type: string
+                  description: "The ID of the coach for this rate."
+                  example: "coach12345"  # You can dynamically populate this based on coach IDs fetched from another API.
+      responses:
+        '200':
+          description: Rate created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rate created successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+                      title:
+                        type: string
+                        example: "Standard Rate"
+                      price:
+                        type: number
+                        format: float
+                        example: 100.5
+                      description:
+                        type: string
+                        example: "Standard rate for services."
+                      currency:
+                        type: string
+                        example: "USD"
+                      duration:
+                        type: string
+                        example: "01:00:00"
+                      earned:
+                        type: string
+                        example: "$150.75"
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    get:
+      tags:
+        - Rates
+      summary: Retrieve a list of all rates
+      description: Get a list of all rates for coaches. Requires a valid `coach` token.
+      operationId: getRates
+      responses:
+        '200':
+          description: List of rates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rates retrieved successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+                        title:
+                          type: string
+                          example: "Standard Rate"
+                        price:
+                          type: number
+                          format: float
+                          example: 100.5
+                        description:
+                          type: string
+                          example: "Standard rate for services."
+                        currency:
+                          type: string
+                          example: "USD"
+                        duration:
+                          type: string
+                          example: "01:00:00"
+                        earned:
+                          type: string
+                          example: "$150.75"
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /api/rates/{id}:
+    get:
+      tags:
+        - Rates
+      summary: Retrieve a specific rate by its id
+      description: Get details of a specific rate by its ID. Requires a valid `coach` token.
+      operationId: getRateById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+      responses:
+        '200':
+          description: Rate retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rate retrieved successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+                      title:
+                        type: string
+                        example: "Standard Rate"
+                      price:
+                        type: number
+                        format: float
+                        example: 100.5
+                      description:
+                        type: string
+                        example: "Standard rate for services."
+                      currency:
+                        type: string
+                        example: "USD"
+                      duration:
+                        type: string
+                        example: "01:00:00"
+                      earned:
+                        type: string
+                        example: "$150.75"
+        '404':
+          description: Rate not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    put:
+      tags:
+        - Rates
+      summary: Update a specific rate by id
+      description: Update the rate details by its ID. Requires a valid `coach` token.
+      operationId: updateRateById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Standard Rate"
+                price:
+                  type: number
+                  format: float
+                  example: 100.50
+                description:
+                  type: string
+                  example: "Standard rate for services."
+                currency:
+                  type: string
+                  example: "USD"
+                duration:
+                  type: string
+                  example: "1 hour"
+                earned:
+                  type: string
+                  example: "150.75"
+                coach_id:
+                  type: string
+                  description: "The ID of the coach for this rate."
+                  example: "coach12345"  # The coach's ID for selection in the dropdown
+      responses:
+        '200':
+          description: Rate updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Rate updated successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+                      title:
+                        type: string
+                        example: "Standard Rate"
+                      price:
+                        type: number
+                        format: float
+                        example: 100.5
+                      description:
+                        type: string
+                        example: "Standard rate for services."
+                      currency:
+                        type: string
+                        example: "USD"
+                      duration:
+                        type: string
+                        example: "01:00:00"
+                      earned:
+                        type: string
+                        example: "$150.75"
+        '404':
+          description: Rate not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error 
+          
+  
+    delete:
+      tags:
+        - Rates
+      summary: Delete a specific rate by ID
+      description: Remove a rate from the system. Requires a valid coach token with appropriate permissions.
+      operationId: deleteRateById
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            description: Unique identifier of the rate to be deleted
+            example: "9dad4994-15b3-4fc4-9a4f-a4ffbf65d951"
+      responses:
+        '200':
+          description: Rate successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteRateResponse'
+        '404':
+          description: Rate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions to delete the rate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          
+  /api/referral:
+    get:
+      tags: 
+         -  Referral
+      summary: Get User Referrals
+      description: Retrieve referrals for the authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful retrieval of referrals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferralResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+
+  /api/referral/{referralId}/referral:
+    patch:
+      tags: 
+         -  Referral
+      summary: Update Referral Status
+      description: Update the status of a specific referral
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: referralId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Referral status updated successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '404':
+          description: Referral not found
+
+    get:
+      tags: 
+         -  Referral
+      summary: Get Specific Referral
+      description: Retrieve details of a specific referral
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: referralId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Referral details retrieved successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '404':
+          description: Referral not found
+
+  /api/referral/{userId}:
+    get:
+      tags: 
+         -  Referral
+      summary: Get Referrals by User
+      description: Retrieve referrals for a specific user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Referrals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferralResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '404':
+          description: User not found
+  /api/file-resource:
+    get:
+      tags: 
+         -  File Resource
+      summary: List File Resources
+      description: Retrieve a list of file resources
+      operationId: listFileResources
+      responses:
+        '200':
+          description: Successful retrieval of file resources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Resources retrieved successfully."
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags: 
+         -  File Resource
+      summary: Store File Metadata
+      description: Store metadata for a file resource
+      operationId: storeFileMetadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  example: "example.pdf"
+                filesize:
+                  type: integer
+                  example: 1024
+                filetype:
+                  type: string
+                  example: "application/pdf"
+      responses:
+        '200':
+          description: File metadata stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  metadata:
+                    type: object
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/file-resource/upload-url:
+    get:
+      tags: 
+         -  File Resource
+      summary: Get S3 Upload URL
+      description: Generate a pre-signed URL for uploading a file to S3
+      operationId: getUploadUrl
+      parameters:
+        - in: query
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: Name of the file to be uploaded
+        - in: query
+          name: filetype
+          required: true
+          schema:
+            type: string
+          description: MIME type of the file
+      responses:
+        '200':
+          description: Pre-signed upload URL generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadUrl:
+                    type: string
+                    example: "https://s3.amazonaws.com/bucket/presigned-upload-url"
+                  fields:
+                    type: object
+                    description: Additional form fields required for upload
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/file-resource/download-url:
+    post:
+      tags: 
+         -  File Resource
+      summary: Get S3 Download URL
+      description: Generate a pre-signed URL for downloading a file from S3
+      operationId: getDownloadUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileKey:
+                  type: string
+                  description: Unique identifier for the file in S3
+                  example: "path/to/file.pdf"
+      responses:
+        '200':
+          description: Pre-signed download URL generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downloadUrl:
+                    type: string
+                    example: "https://s3.amazonaws.com/bucket/presigned-download-url"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                
+ 
+    post:
+      tags:
+        - Chat
+      summary: Upload a Voice Message
+      description: Upload a voice message to a conversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceMessageRequest'
+      responses:
+        '200':
+          description: Voice message uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoiceMessageResponse'
+  /api/chats:
+  get:
+    tags:
+      - Chat
+    summary: List Conversations
+    description: Retrieve all conversations for the authenticated user
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: List of conversations retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationListResponse'
+
+  /api/chats/{conversationId}:
+  get:
+    tags:
+      - Chat
+    summary: Get Specific Conversation
+    description: Retrieve details of a specific conversation
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Conversation details retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationResponse'
+      '404':
+        description: Conversation not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
+
+  /api/chats/{conversationId}/read:
+  put:
+    tags:
+      - Chat
+    summary: Mark Conversation as Read
+    description: Mark all messages in a conversation as read
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Conversation marked as read
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatSuccessResponse'
+
+  /api/chats/{receiverId}/messages:
+  post:
+    tags:
+      - Chat
+    summary: Send a Message
+    description: Send a new message to a recipient
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: receiverId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SendMessageRequest'
+          example:
+            message: "This is my reply to your first message!"
+            conversation_id: "2ba83790-24ee-4ff8-a4b7-a0d365f4c581"
+            parent_message_id: "759cb59a-dba9-4d4e-99b0-697add57777e"
+    responses:
+      '200':
+        description: Message sent successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageResponse'
+
+  /api/messages/{messageId}:
+  delete:
+    tags:
+      - Chat
+    summary: Delete a Message
+    description: Delete a specific message
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Message deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatSuccessResponse'
+
+  /api/chats/upload-file:
+  post:
+    tags:
+      - Chat
+    summary: Upload a File
+    description: Upload a file to a conversation
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+              conversation_id:
+                type: string
+                format: uuid
+              receiver_id:
+                type: string
+                format: uuid
+          example:
+            file: "<binary_file_data>"
+            conversation_id: "583f407f-9e86-47af-b09b-79e252f94715"
+            receiver_id: "9e09a953-0165-47f4-92f7-b4e6165107c9"
+    responses:
+      '200':
+        description: File uploaded successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadResponse'
+
+  /api/chats/upload-voice:
+  post:
+    tags:
+      - Chat
+    summary: Upload a Voice Message
+    description: Upload a voice message to a conversation
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              audio_blob:
+                type: string
+                format: base64
+                description: Base64 encoded audio data
+              duration:
+                type: integer
+                description: Duration of the audio in seconds
+              conversation_id:
+                type: string
+                format: uuid
+              receiver_id:
+                type: string
+                format: uuid
+          example:
+            audio_blob: "base64_encoded_audio"
+            duration: 120
+            conversation_id: "583f407f-9e86-47af-b09b-79e252f94715"
+            receiver_id: "9e09a953-0165-47f4-92f7-b4e6165107c9"
+    responses:
+      '200':
+        description: Voice message uploaded successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT (JSON Web Token) authentication.
+        Obtain the token via the /auth/login endpoint and include it in the Authorization header.
+        Example: `Authorization: Bearer <token>`
+
+  schemas:
+    UserRegistrationRequest:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - password_confirmation
+        - user_role
+      properties:
+        first_name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's first name
+          example: "John"
+        last_name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's last name
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          description: Unique email address for user registration
+          example: "john.doe@example.com"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: |
+            User password with complexity requirements:
+            - Minimum 8 characters
+            - Must include uppercase and lowercase letters
+            - Must include at least one number
+            - Must include at least one special character
+          format: password
+        password_confirmation:
+          type: string
+          description: Must match the password field
+        user_role:
+          type: string
+          enum:
+            - administrator
+            - coach
+            - coachee
+          description: Role determines user's access and capabilities
+
+    UserRegistrationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "User created successfully"
+        code:
+          type: integer
+          example: 201
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            first_name:
+              type: string
+            last_name:
+              type: string
+            email:
+              type: string
+              format: email
+            user_role:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        user_role:
+          type: string
+          enum:
+            - administrator
+            - coach
+            - coachee
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+            - suspended
+        avatar:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserSettings:
+      type: object
+      properties:
+        visibility:
+          type: string
+          enum:
+            - public
+            - private
+            - limited
+          nullable: true
+        default_language:
+          type: string
+          example: "en"
+          nullable: true
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        currency:
+          type: string
+          example: "USD"
+          nullable: true
+        gender:
+          type: string
+          nullable: true
+        pronouns:
+          type: string
+          nullable: true
+        time_clock:
+          type: string
+          enum:
+            - 12h
+            - 24h
+          nullable: true
+        calender_format:
+          type: string
+          enum:
+            - MM/DD/YYYY
+            - DD/MM/YYYY
+          nullable: true
+        sync_calender:
+          type: boolean
+          default: false
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Detailed error message
+        code:
+          type: integer
+          description: HTTP status code
+        status:
+          type: boolean
+          example: false
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+                
+    ReferralResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Referrals retrieved successfully."
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            current_page:
+              type: integer
+              example: 1
+            data:
+              type: array
+              items: {}
+            first_page_url:
+              type: string
+              example: "http://127.0.0.1:8000/api/referral?page=1"
+            from:
+              type: string
+              nullable: true
+            last_page:
+              type: integer
+              example: 1
+            last_page_url:
+              type: string
+              example: "http://127.0.0.1:8000/api/referral?page=1"
+            links:
+              type: array
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    nullable: true
+                  label:
+                    type: string
+                  active:
+                    type: boolean
+            next_page_url:
+              type: string
+              nullable: true
+            path:
+              type: string
+              example: "http://127.0.0.1:8000/api/referral"
+            per_page:
+              type: integer
+              example: 20
+            prev_page_url:
+              type: string
+              nullable: true
+            to:
+              type: string
+              nullable: true
+            total:
+              type: integer
+              example: 0
+    DeleteRateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Rate deleted successfully."
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: "success" 
+    
+    ContactInfoResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Contact information retrieved successfully."
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            first_name:
+              type: string
+              example: "Bruce"
+            last_name:
+              type: string
+              example: "Dick"
+            email:
+              type: string
+              format: email
+              example: "john.38doe@example.com"
+            address:
+              type: string
+              nullable: true
+              example: null
+            time_zone:
+              type: string
+              nullable: true
+              example: null
+            area_code:
+              type: string
+              nullable: true
+              example: null
+            country_code:
+              type: string
+              nullable: true
+              example: null
+            phone_number:
+              type: string
+              nullable: true
+              example: null
+            country:
+              type: string
+              nullable: true
+              example: null
+            communication_method:
+              type: string
+              nullable: true
+              example: null
+
+    ContactInfoUpdateRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "Bruce"
+        last_name:
+          type: string
+          example: "Dick"
+        email:
+          type: string
+          format: email
+          example: "john.38doe@example.com"
+        address:
+          type: string
+          nullable: true
+          example: null
+        time_zone:
+          type: string
+          nullable: true
+          example: null
+        area_code:
+          type: string
+          nullable: true
+          example: null
+        country_code:
+          type: string
+          nullable: true
+          example: null
+        phone_number:
+          type: string
+          nullable: true
+          example: null
+        country:
+          type: string
+          nullable: true
+          example: null
+        communication_method:
+          type: string
+          nullable: true
+          example: null
+    
+
+    UserSettingsUpdateRequest:
+      type: object
+      properties:
+        notification_preferences:
+          type: object
+          properties:
+            email_notifications:
+              type: boolean
+            sms_notifications:
+              type: boolean
+            push_notifications:
+              type: boolean
+        privacy_settings:
+          type: object
+          properties:
+            profile_visibility:
+              type: string
+              enum: 
+                - public
+                - private
+                - limited
+            data_sharing:
+              type: boolean
+        communication_preferences:
+          type: object
+          properties:
+            preferred_communication_method:
+              type: string
+              enum:
+                - email
+                - sms
+                - phone
+                - in_app
+            language:
+              type: string
+        theme_preferences:
+          type: object
+          properties:
+            dark_mode:
+              type: boolean
+            color_scheme:
+              type: string
+        accessibility_settings:
+          type: object
+          properties:
+            high_contrast:
+              type: boolean
+            font_size:
+              type: string
+              enum:
+                - small
+                - medium
+                - large
+        coaching_preferences:
+          type: object
+          properties:
+            coaching_style:
+              type: string
+            session_reminder:
+              type: boolean
+    SendMessageRequest:
+      type: object
+      required:
+        - message
+        - type
+      properties:
+        message:
+          type: string
+          example: "Hello!"
+        type:
+          type: string
+          enum: [text, voice]
+        conversation_id:
+          type: string
+          format: uuid
+        parent_message_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Message sent successfully"
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            chatId:
+              type: string
+              format: uuid
+            message:
+              type: string
+            parent_message_id:
+              type: string
+              format: uuid
+              nullable: true
+            conversationId:
+              type: string
+              format: uuid
+            type:
+              type: string
+              enum: [text, voice]
+            status:
+              type: string
+              enum: [sent, delivered, read]
+            createdAt:
+              type: string
+              format: date-time
+            readAt:
+              type: string
+              format: date-time
+              nullable: true
+            deliveredAt:
+              type: string
+              format: date-time
+            receiver:
+              $ref: '#/components/schemas/ChatUser'
+            sender:
+              $ref: '#/components/schemas/ChatUser'
+
+    VoiceMessageRequest:
+      type: object
+      required:
+        - audio_blob
+        - duration
+        - conversation_id
+        - receiver_id
+      properties:
+        audio_blob:
+          type: string
+          format: byte
+          description: Base64 encoded audio data
+        duration:
+          type: integer
+          description: Duration in seconds
+        conversation_id:
+          type: string
+          format: uuid
+        receiver_id:
+          type: string
+          format: uuid
+
+    VoiceMessageResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/MessageResponse'
+      properties:
+        data:
+          type: object
+          properties:
+            files:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChatFile'
+
+    ChatFile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileUid:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+        fileUrl:
+          type: string
+        duration:
+          type: integer
+          description: Duration in seconds (for audio/video files)
+
+    ChatUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        avatar:
+          type: string
+          nullable: true
+
+    ChatSuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            updated_count:
+              type: integer
+              example: 0
+
+    ConversationListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationResponse'
+
+    ConversationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatUser'
+        last_message:
+          $ref: '#/components/schemas/MessageResponse'
+        unread_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    FileUploadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "File uploaded successfully"
+        code:
+          type: integer
+          example: 200
+        status:
+          type: string
+          example: "success"
+        data:
+          $ref: '#/components/schemas/ChatFile'
