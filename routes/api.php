@@ -13,6 +13,8 @@ use App\Http\Controllers\API\{
     AuthController,
     GoogleController,
     DashboardController,
+    TransactionPaymentController,
+    TransactionController,
     SupplierController,
     AnimalProductionController,
     FeedTypeController,
@@ -77,7 +79,19 @@ Route::middleware('api')->group(function () {
             });
         });
 
+        Route::prefix('animals/{animal}')->middleware(['auth:sanctum'])->group(function () {
+            // Transactions summary route
+            Route::get('transactions/summary', [TransactionController::class, 'summary'])
+                ->name('transactions.summary');
 
+            // Payments summary route (defined BEFORE apiResource to avoid conflict)
+            Route::get('payments/summary', [TransactionPaymentController::class, 'summary'])
+                ->name('payments.summary');
+
+            // Resource routes
+            Route::apiResource('transactions', TransactionController::class);
+            Route::apiResource('payments', TransactionPaymentController::class);
+        });
 
 
         Route::apiResource('animals.treats', TreatController::class);

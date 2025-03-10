@@ -2,13 +2,12 @@
 
 namespace App\Enums;
 
-enum TransactionStatus: string
-{
-    case PENDING = 'pending';
-    case DEPOSIT_PAID = 'deposit_paid';
-    case IN_PROGRESS = 'in_progress';
-    case COMPLETED = 'completed';
-    case CANCELLED = 'cancelled';
-    case REFUNDED = 'refunded';
-    case DISPUTED = 'disputed';
+enum TransactionStatus: string {
+    case Pending = 'pending';
+    case DepositPaid = 'deposit_paid';
+    case InProgress = 'in_progress';
+    case Completed = 'completed';
+    case Cancelled = 'cancelled';
+    case Refunded = 'refunded';
+    case Disputed = 'disputed';
 }

@@ -7,6 +7,8 @@ use App\Enums\Priority;
 use App\Enums\Status;
 use App\Enums\TaskType;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreTaskRequest extends FormRequest
 {
@@ -35,5 +37,27 @@ class StoreTaskRequest extends FormRequest
             'repeat_frequency' => 'nullable|integer|min:1',
             'end_repeat_date' => 'nullable|date',
         ];
+    }
+
+     /**
+     * Handle a failed validation attempt.
+     */
+    protected function failedValidation(Validator $validator): void
+    {
+        $errors = $validator->errors();
+        $formattedErrors = [];
+
+        foreach ($errors->messages() as $key => $messages) {
+            foreach ($messages as $message) {
+                $formattedErrors[$key] = $message;
+            }
+        }
+
+        throw new HttpResponseException(
+            response()->json([
+                'message' => 'Validation failed',
+                'errors' => $formattedErrors,
+            ], 422)
+        );
     }
 }

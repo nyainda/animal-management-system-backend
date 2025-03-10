@@ -135,7 +135,7 @@ return new class extends Migration
         });
 
         Schema::create('transaction_payments', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->uuid('transaction_id');
             $table->uuid('recorded_by')->nullable(); // User who recorded the payment
             $table->decimal('amount', 10, 2);

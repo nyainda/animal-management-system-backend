@@ -48,7 +48,7 @@ class UpdateAnimalRequest extends FormRequest
             'string',
             Rule::unique('animals')->ignore($animalId)
             ],
-            'birth_date' => 'sometimes|date',
+            'birth_date' => 'nullable|date',
             'weight' => 'nullable|numeric',
             'height' => 'nullable|numeric',
             'coloring' => 'nullable|string',
@@ -71,8 +71,8 @@ class UpdateAnimalRequest extends FormRequest
     protected function birthDetailRules(): array
     {
         return [
-            'birth_time' => 'sometimes|date',
-            'birth_status' => 'sometimes|string',
+            'birth_time' => 'nullable|date',
+            'birth_status' => 'nullable|string',
             'colostrum_intake' => 'nullable|integer',
             'health_at_birth' => 'sometimes|string',
             'birth_weight' => 'nullable|numeric',

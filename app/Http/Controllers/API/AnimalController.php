@@ -20,6 +20,67 @@ class AnimalController extends Controller
 {
     use ApiResponse;
 
+
+    /**
+ * Display the specified animal with its details.
+ *
+ * @param string $id
+ * @return JsonResponse
+ */
+public function show(string $id): JsonResponse
+{
+    try {
+        // Fetch the animal with related data for the authenticated user
+        $animal = Animal::query()
+            ->select([
+                'id', 'name', 'type', 'breed', 'status',
+                'tag_number', 'birth_date', 'gender',
+                'weight', 'height', 'is_breeding_stock'
+            ])
+            ->with([
+                'birthDetail:id,animal_id,birth_weight,birth_status,health_at_birth',
+                'damRelationship:id,animal_id,related_animal_id',
+                'sireRelationship:id,animal_id,related_animal_id',
+                'damRelationship.relatedAnimal:id,name,type,gender,birth_date',
+                'sireRelationship.relatedAnimal:id,name,type,gender,birth_date',
+            ])
+            ->forUser(Auth::id())
+            ->findOrFail($id);
+
+        // Merge animal data with additional details
+        $responseData = $this->mergeAnimalWithDetails($animal);
+
+        // Add status-related information
+        $responseData['status_group'] = $animal->status->getGroup();
+        $responseData['status_color'] = $animal->status->getStatusColor();
+        $responseData['status_action'] = $animal->status->requiresAction();
+
+        // Cache the result for 5 minutes
+        $cacheKey = "animal_{$id}_user_" . Auth::id();
+        $cachedData = Cache::remember($cacheKey, 300, function () use ($responseData) {
+            return $responseData;
+        });
+
+        return $this->successResponse(
+            $cachedData,
+            'Animal retrieved successfully'
+        );
+    } catch (Exception $e) {
+        Log::error('Animal Show Error', [
+            'animal_id' => $id,
+            'user_id' => Auth::id(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return $this->errorResponse(
+            'Failed to retrieve animal',
+            500,
+            [$e->getMessage()]
+        );
+    }
+}
+
     /**
      * Display a listing of animals.
      */

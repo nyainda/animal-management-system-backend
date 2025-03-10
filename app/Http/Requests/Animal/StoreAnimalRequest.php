@@ -37,7 +37,7 @@ class StoreAnimalRequest extends FormRequest
             'breed' => 'required|string',
             'gender' => 'required|in:male,female',
             'tag_number' => 'sometimes|string',
-            'birth_date' => 'required|date',
+            'birth_date' => 'nullable|date',
             'weight' => 'nullable|numeric',
             'height' => 'nullable|numeric',
             'coloring' => 'nullable|string',
@@ -56,8 +56,8 @@ class StoreAnimalRequest extends FormRequest
     protected function birthDetailRules(): array
     {
         return [
-            'birth_time' => 'required|date',
-            'birth_status' => 'required|string',
+            'birth_time' => 'nullable|date',
+            'birth_status' => 'nullable|string',
             'colostrum_intake' => 'nullable|integer',
             'health_at_birth' => 'required|string',
             'birth_weight' => 'nullable|numeric',
