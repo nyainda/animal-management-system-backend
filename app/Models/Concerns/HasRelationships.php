@@ -63,6 +63,11 @@ trait HasRelationships
         return $this->hasMany(Note::class);
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function feedTypes(): HasMany
     {
         return $this->hasMany(FeedType::class);
