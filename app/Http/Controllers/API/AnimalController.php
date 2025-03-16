@@ -35,7 +35,7 @@ public function show(string $id): JsonResponse
             ->select([
                 'id', 'name', 'type', 'breed', 'status',
                 'tag_number', 'birth_date', 'gender',
-                'weight', 'height', 'is_breeding_stock'
+                'weight', 'height', 'is_breeding_stock','internal_id'
             ])
             ->with([
                 'birthDetail:id,animal_id,birth_weight,birth_status,health_at_birth',
@@ -93,7 +93,7 @@ public function show(string $id): JsonResponse
             ->select([
                 'id', 'name', 'type', 'breed', 'status',
                 'tag_number', 'birth_date', 'gender',
-                'weight', 'height', 'is_breeding_stock'
+                'weight', 'height', 'is_breeding_stock', 'internal_id'
             ])
             ->with([
                 'birthDetail:id,animal_id,birth_weight,birth_status,health_at_birth',

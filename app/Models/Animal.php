@@ -29,7 +29,7 @@ class Animal extends Model
         'birth_date', 'dam_id', 'sire_id', 'birth_weight', 'weight_unit',
         'birth_time', 'birth_status', 'colostrum_intake', 'health_at_birth',
         'milk_feeding', 'vaccinations', 'breeder_info', 'birth_photos',
-        'raised_purchased', 'last_breeding_date'
+        'raised_purchased', 'last_breeding_date','internal_id'
     ];
 
     protected $hidden = [
