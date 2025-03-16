@@ -34,7 +34,17 @@ class StoreYieldRecordRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-
+             //   Rule::unique('production_methods', 'method_name')->where(function ($query) {
+                    // Get the category ID however you're doing it in your controller:
+              //      $categoryId = $this->route()->parameter('category'); // Example: From route parameter
+              //      if (!$categoryId && isset($this->category)){
+               //         $categoryId = $this->category->id;
+               //     }
+               //     if ($categoryId) {
+               //         return $query->where('product_category_id', $categoryId);
+               //     }
+               //     return $query;
+               // }),
             ],
             'production_method.description' => 'nullable|string',
             'production_method.requires_certification' => 'required|boolean',

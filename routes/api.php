@@ -45,6 +45,8 @@ Route::middleware('api')->group(function () {
         // Auth & Verification
         Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
         Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+        Route::get('/user', [AuthenticatedSessionController::class, 'user']);
+        Route::post('/profile', [AuthenticatedSessionController::class, 'updateProfile']);
 
         Route::middleware('throttle:6,1')->group(function () {
             Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
