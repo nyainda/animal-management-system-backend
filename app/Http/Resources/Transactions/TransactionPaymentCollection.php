@@ -4,14 +4,30 @@ namespace App\Http\Resources\TransactionPayment;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+/**
+ * @OA\Schema(
+ *     schema="TransactionPaymentCollection",
+ *     type="object",
+ *     title="Transaction Payment Collection",
+ *     description="A paginated collection of transaction payments",
+ *     @OA\Property(
+ *         property="data",
+ *         type="array",
+ *         @OA\Items(ref="#/components/schemas/TransactionPaymentResource")
+ *     ),
+ *     @OA\Property(
+ *         property="meta",
+ *         type="object",
+ *         @OA\Property(property="total", type="integer", example=50, description="Total number of payments"),
+ *         @OA\Property(property="count", type="integer", example=15, description="Number of payments in current page"),
+ *         @OA\Property(property="per_page", type="integer", example=15, description="Items per page"),
+ *         @OA\Property(property="current_page", type="integer", example=1, description="Current page number"),
+ *         @OA\Property(property="total_pages", type="integer", example=4, description="Total number of pages")
+ *     )
+ * )
+ */
 class TransactionPaymentCollection extends ResourceCollection
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-     */
     public function toArray($request)
     {
         return [

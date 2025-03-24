@@ -1,7 +1,7 @@
 <?php
 
 // app/Http/Resources/BreedingResource.php
-namespace App\Http\Resources;
+namespace App\Http\Resources\Breeding;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

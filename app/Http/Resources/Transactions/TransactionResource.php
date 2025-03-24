@@ -1,45 +1,100 @@
 <?php
-// TransactionResource.php
+
 namespace App\Http\Resources\Transactions;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\TransactionPayment\TransactionPaymentResource;
-use App\Http\Resources\User\UserBasicResource;
-use App\Http\Resources\Animal\AnimalBasicResource;
+// use App\Http\Resources\User\UserBasicResource;
+// use App\Http\Resources\Animal\AnimalBasicResource;
 
+/**
+ * @OA\Schema(
+ *     schema="TransactionResource",
+ *     type="object",
+ *     title="Transaction Resource",
+ *     description="A resource representing a transaction",
+ *     @OA\Property(property="id", type="integer", example=1, description="Unique identifier of the transaction"),
+ *     @OA\Property(property="transaction_type", type="string", example="sale", description="Type of transaction (e.g., sale, purchase)"),
+ *     @OA\Property(property="price", type="number", format="float", example=1000.00, description="Base price of the transaction"),
+ *     @OA\Property(property="tax_amount", type="number", format="float", nullable=true, example=50.00, description="Tax amount"),
+ *     @OA\Property(property="total_amount", type="number", format="float", example=1050.00, description="Total amount including tax"),
+ *     @OA\Property(property="currency", type="string", example="USD", description="Currency of the transaction"),
+ *     @OA\Property(property="transaction_date", type="string", format="date-time", example="2025-03-24T10:00:00Z", description="Date and time of the transaction"),
+ *     @OA\Property(property="delivery_date", type="string", format="date-time", nullable=true, example="2025-03-26T10:00:00Z", description="Delivery date and time"),
+ *     @OA\Property(property="details", type="string", nullable=true, example="Sale of livestock", description="Transaction details"),
+ *     @OA\Property(property="payment_method", type="string", nullable=true, example="credit_card", description="Payment method"),
+ *     @OA\Property(property="payment_reference", type="string", nullable=true, example="REF12345", description="Payment reference"),
+ *     @OA\Property(property="deposit_amount", type="number", format="float", nullable=true, example=500.00, description="Deposit amount paid"),
+ *     @OA\Property(property="balance_due", type="number", format="float", example=550.00, description="Remaining balance due"),
+ *     @OA\Property(property="payment_due_date", type="string", format="date-time", nullable=true, example="2025-04-24T10:00:00Z", description="Payment due date"),
+ *     @OA\Property(property="transaction_status", type="string", example="pending", description="Status of the transaction (e.g., pending, deposit_paid, paid)"),
+ *     @OA\Property(property="seller_name", type="string", nullable=true, example="John Doe", description="Name of the seller (non-registered)"),
+ *     @OA\Property(property="seller_company", type="string", nullable=true, example="Doe Farms", description="Seller's company name"),
+ *     @OA\Property(property="seller_tax_id", type="string", nullable=true, example="TAX123", description="Seller's tax ID"),
+ *     @OA\Property(property="seller_contact", type="string", nullable=true, example="Jane Smith", description="Seller's contact person"),
+ *     @OA\Property(property="seller_email", type="string", nullable=true, example="john@doefarms.com", description="Seller's email"),
+ *     @OA\Property(property="seller_phone", type="string", nullable=true, example="+1234567890", description="Seller's phone"),
+ *     @OA\Property(property="seller_address", type="string", nullable=true, example="123 Farm Rd", description="Seller's address"),
+ *     @OA\Property(property="seller_city", type="string", nullable=true, example="Springfield", description="Seller's city"),
+ *     @OA\Property(property="seller_state", type="string", nullable=true, example="IL", description="Seller's state"),
+ *     @OA\Property(property="seller_country", type="string", nullable=true, example="USA", description="Seller's country"),
+ *     @OA\Property(property="seller_postal_code", type="string", nullable=true, example="62701", description="Seller's postal code"),
+ *     @OA\Property(property="seller_identification", type="string", nullable=true, example="ID123", description="Seller's identification"),
+ *     @OA\Property(property="seller_license_number", type="string", nullable=true, example="LIC456", description="Seller's license number"),
+ *     @OA\Property(property="buyer_name", type="string", nullable=true, example="Jane Doe", description="Name of the buyer (non-registered)"),
+ *     @OA\Property(property="buyer_company", type="string", nullable=true, example="Doe Buyers Inc.", description="Buyer's company name"),
+ *     @OA\Property(property="buyer_tax_id", type="string", nullable=true, example="TAX456", description="Buyer's tax ID"),
+ *     @OA\Property(property="buyer_contact", type="string", nullable=true, example="John Smith", description="Buyer's contact person"),
+ *     @OA\Property(property="buyer_email", type="string", nullable=true, example="jane@doebuyers.com", description="Buyer's email"),
+ *     @OA\Property(property="buyer_phone", type="string", nullable=true, example="+1234567891", description="Buyer's phone"),
+ *     @OA\Property(property="buyer_address", type="string", nullable=true, example="456 Buyer Rd", description="Buyer's address"),
+ *     @OA\Property(property="buyer_city", type="string", nullable=true, example="Springfield", description="Buyer's city"),
+ *     @OA\Property(property="buyer_state", type="string", nullable=true, example="IL", description="Buyer's state"),
+ *     @OA\Property(property="buyer_country", type="string", nullable=true, example="USA", description="Buyer's country"),
+ *     @OA\Property(property="buyer_postal_code", type="string", nullable=true, example="62702", description="Buyer's postal code"),
+ *     @OA\Property(property="buyer_identification", type="string", nullable=true, example="ID456", description="Buyer's identification"),
+ *     @OA\Property(property="buyer_license_number", type="string", nullable=true, example="LIC789", description="Buyer's license number"),
+ *     @OA\Property(property="invoice_number", type="string", nullable=true, example="INV001", description="Invoice number"),
+ *     @OA\Property(property="contract_number", type="string", nullable=true, example="CON001", description="Contract number"),
+ *     @OA\Property(property="terms_accepted", type="boolean", example=true, description="Whether terms were accepted"),
+ *     @OA\Property(property="terms_accepted_at", type="string", format="date-time", nullable=true, example="2025-03-24T10:00:00Z", description="Timestamp when terms were accepted"),
+ *     @OA\Property(property="health_certificate_number", type="string", nullable=true, example="HC001", description="Health certificate number"),
+ *     @OA\Property(property="transport_license_number", type="string", nullable=true, example="TL001", description="Transport license number"),
+ *     @OA\Property(property="attached_documents", type="array", nullable=true, @OA\Items(type="string", example="doc1.pdf"), description="List of attached documents"),
+ *     @OA\Property(property="location_of_sale", type="string", nullable=true, example="Farm Market", description="Location of sale"),
+ *     @OA\Property(property="terms_and_conditions", type="array", nullable=true, @OA\Items(type="string", example="Payment within 30 days"), description="Terms and conditions"),
+ *     @OA\Property(property="special_conditions", type="string", nullable=true, example="Requires vet check", description="Special conditions"),
+ *     @OA\Property(property="delivery_instructions", type="string", nullable=true, example="Deliver to back gate", description="Delivery instructions"),
+ *     @OA\Property(property="insurance_policy_number", type="string", nullable=true, example="INS001", description="Insurance policy number"),
+ *     @OA\Property(property="insurance_amount", type="number", format="float", nullable=true, example=200.00, description="Insurance amount"),
+ *     @OA\Property(
+ *         property="payments",
+ *         type="array",
+ *         description="List of payments associated with the transaction",
+ *         @OA\Items(
+ *             type="object",
+ *             @OA\Property(property="id", type="integer", example=1, description="Unique identifier of the payment"),
+ *             @OA\Property(property="transaction_id", type="integer", example=1, description="ID of the associated transaction"),
+ *             @OA\Property(property="amount", type="number", format="float", example=500.00, description="Payment amount"),
+ *             @OA\Property(property="payment_method", type="string", example="credit_card", description="Method used for payment"),
+ *             @OA\Property(property="payment_reference", type="string", nullable=true, example="REF123", description="Payment reference"),
+ *             @OA\Property(property="payment_date", type="string", format="date-time", example="2025-03-24T10:00:00Z", description="Date and time of the payment"),
+ *             @OA\Property(property="payment_status", type="string", example="completed", description="Status of the payment"),
+ *             @OA\Property(property="notes", type="string", nullable=true, example="Initial deposit", description="Additional notes about the payment"),
+ *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-03-24T10:00:00Z", description="Creation timestamp"),
+ *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-03-24T12:00:00Z", description="Last update timestamp")
+ *         )
+ *     ),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-03-24T10:00:00Z", description="Creation timestamp"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-03-24T12:00:00Z", description="Last update timestamp")
+ * )
+ */
 class TransactionResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-     */
     public function toArray($request)
     {
         return [
             'id' => $this->id,
-            // Uncomment these lines if you need to include related resources and make sure they're properly loaded
-            // 'animal' => $this->whenLoaded('animal', function() {
-            //     return new AnimalBasicResource($this->animal);
-            // }),
-            // 'seller' => $this->when($this->seller_id, function() {
-            //     return $this->whenLoaded('seller', function() {
-            //         return new UserBasicResource($this->seller);
-            //     });
-            // }),
-            // 'buyer' => $this->when($this->buyer_id, function() {
-            //     return $this->whenLoaded('buyer', function() {
-            //         return new UserBasicResource($this->buyer);
-            //     });
-            // }),
-            // 'created_by' => $this->when($this->created_by, function() {
-            //     return $this->whenLoaded('creator', function() {
-            //         return new UserBasicResource($this->creator);
-            //     });
-            // }),
-
-            // Transaction Details
             'transaction_type' => $this->transaction_type,
             'price' => $this->price,
             'tax_amount' => $this->tax_amount,
@@ -48,16 +103,12 @@ class TransactionResource extends JsonResource
             'transaction_date' => $this->transaction_date,
             'delivery_date' => $this->delivery_date,
             'details' => $this->details,
-
-            // Payment Information
             'payment_method' => $this->payment_method,
             'payment_reference' => $this->payment_reference,
             'deposit_amount' => $this->deposit_amount,
             'balance_due' => $this->balance_due,
             'payment_due_date' => $this->payment_due_date,
             'transaction_status' => $this->transaction_status,
-
-            // Seller Information (for non-registered sellers)
             'seller_name' => $this->seller_name,
             'seller_company' => $this->seller_company,
             'seller_tax_id' => $this->seller_tax_id,
@@ -71,8 +122,6 @@ class TransactionResource extends JsonResource
             'seller_postal_code' => $this->seller_postal_code,
             'seller_identification' => $this->seller_identification,
             'seller_license_number' => $this->seller_license_number,
-
-            // Buyer Information (for non-registered buyers)
             'buyer_name' => $this->buyer_name,
             'buyer_company' => $this->buyer_company,
             'buyer_tax_id' => $this->buyer_tax_id,
@@ -86,8 +135,6 @@ class TransactionResource extends JsonResource
             'buyer_postal_code' => $this->buyer_postal_code,
             'buyer_identification' => $this->buyer_identification,
             'buyer_license_number' => $this->buyer_license_number,
-
-            // Documentation
             'invoice_number' => $this->invoice_number,
             'contract_number' => $this->contract_number,
             'terms_accepted' => $this->terms_accepted,
@@ -95,21 +142,15 @@ class TransactionResource extends JsonResource
             'health_certificate_number' => $this->health_certificate_number,
             'transport_license_number' => $this->transport_license_number,
             'attached_documents' => $this->attached_documents ? json_decode($this->attached_documents) : null,
-
-            // Additional Information
             'location_of_sale' => $this->location_of_sale,
             'terms_and_conditions' => $this->terms_and_conditions ? json_decode($this->terms_and_conditions) : null,
             'special_conditions' => $this->special_conditions,
             'delivery_instructions' => $this->delivery_instructions,
             'insurance_policy_number' => $this->insurance_policy_number,
             'insurance_amount' => $this->insurance_amount,
-
-            // Payments
             'payments' => $this->whenLoaded('payments', function() {
                 return TransactionPaymentResource::collection($this->payments);
             }),
-
-            // Timestamps
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

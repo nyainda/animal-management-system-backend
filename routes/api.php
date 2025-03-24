@@ -38,6 +38,7 @@ Route::middleware('api')->group(function () {
         Route::post('/register', [RegisteredUserController::class, 'store'])->name('register');
         Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login');
         Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+
     });
 
     // Authentication Required Routes
@@ -123,12 +124,14 @@ Route::middleware('api')->group(function () {
 
 
         // Activities
-        Route::prefix('activities')->group(function () {
-            Route::post('/generate-birthdays', [ActivityController::class, 'generateBirthdayActivities']);
+        Route::post('/activities/generate-birthdays', [ActivityController::class, 'generateBirthdayActivities'])
+            ->name('activities.generate-birthdays');
+
+        Route::prefix('animals/{animal}')->group(function () {
+            Route::get('/activities', [ActivityController::class, 'index'])->name('animals.activities.index');
+            Route::post('/activities', [ActivityController::class, 'store'])->name('animals.activities.store');
+            Route::get('/activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
+            Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
         });
-        Route::apiResource('animals.activities', ActivityController::class)
-            ->except(['update'])
-            ->shallow()
-            ->scoped(['animal' => 'id']);
     });
 });
