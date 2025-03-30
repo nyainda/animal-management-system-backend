@@ -11,7 +11,7 @@ use App\Models\Animal;
 use App\Models\Health;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Support\Facades\{Auth,Log};
+use Illuminate\Support\Facades\{Auth, Log};
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -158,7 +158,13 @@ class HealthController extends Controller
      *             @OA\Property(property="health_status", type="string", example="Healthy", description="Health status"),
      *             @OA\Property(property="vaccination_status", type="string", example="Up-to-date", description="Vaccination status"),
      *             @OA\Property(property="vet_contact_id", type="string", format="uuid", nullable=true, example="123e4567-e89b-12d3-a456-426614174000", description="Vet contact ID"),
-     *             @OA\Property(property="medical_history", type="string", nullable=true, example="Recovered from flu in 2024", description="Medical history"),
+     *             @OA\Property(
+     *                 property="medical_history",
+     *                 type="object",
+     *                 nullable=true,
+     *                 description="Medical history as key-value pairs",
+     *                 example={"2023-10-01": "Routine checkup"}
+     *             ),
      *             @OA\Property(property="dietary_restrictions", type="string", nullable=true, example="No dairy", description="Dietary restrictions"),
      *             @OA\Property(property="neutered_spayed", type="boolean", example=true, description="Neutered or spayed status"),
      *             @OA\Property(property="regular_medication", type="string", nullable=true, example="Daily vitamin supplement", description="Regular medication"),

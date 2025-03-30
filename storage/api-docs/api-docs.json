@@ -2377,9 +2377,11 @@
                                         "nullable": true
                                     },
                                     "medical_history": {
-                                        "description": "Medical history",
-                                        "type": "string",
-                                        "example": "Recovered from flu in 2024",
+                                        "description": "Medical history as key-value pairs",
+                                        "type": "object",
+                                        "example": {
+                                            "2023-10-01": "Routine checkup"
+                                        },
                                         "nullable": true
                                     },
                                     "dietary_restrictions": {
