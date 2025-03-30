@@ -5633,94 +5633,64 @@
                             "schema": {
                                 "properties": {
                                     "title": {
-                                        "description": "Title of the task",
                                         "type": "string",
-                                        "example": "Vaccination"
+                                        "example": "Meeting with Team"
                                     },
                                     "task_type": {
-                                        "description": "Type of the task",
                                         "type": "string",
-                                        "example": "medical"
+                                        "example": "health_check"
                                     },
                                     "start_date": {
-                                        "description": "Start date",
                                         "type": "string",
-                                        "format": "date",
-                                        "example": "2025-03-25"
+                                        "example": "2025-03-15"
                                     },
                                     "start_time": {
-                                        "description": "Start time",
                                         "type": "string",
-                                        "format": "time",
-                                        "example": "09:00:00"
+                                        "example": "14:30"
                                     },
                                     "end_date": {
-                                        "description": "End date",
                                         "type": "string",
-                                        "format": "date",
-                                        "example": "2025-03-25",
-                                        "nullable": true
+                                        "example": "2025-03-15"
                                     },
                                     "end_time": {
-                                        "description": "End time",
                                         "type": "string",
-                                        "format": "time",
-                                        "example": "10:00:00",
-                                        "nullable": true
+                                        "example": "15:30"
                                     },
                                     "duration": {
-                                        "description": "Duration in minutes",
                                         "type": "integer",
                                         "example": 60
                                     },
                                     "description": {
-                                        "description": "Task description",
                                         "type": "string",
-                                        "example": "Administer vaccine"
+                                        "example": "Discuss project progress and next steps"
                                     },
                                     "health_notes": {
-                                        "description": "Health notes",
                                         "type": "string",
-                                        "example": "Monitor side effects",
-                                        "nullable": true
+                                        "example": "Remember to take a break afterward"
                                     },
                                     "location": {
-                                        "description": "Task location",
                                         "type": "string",
-                                        "example": "Barn A"
+                                        "example": "Conference Room A"
                                     },
                                     "priority": {
-                                        "description": "Priority level",
                                         "type": "string",
-                                        "enum": [
-                                            "low",
-                                            "medium",
-                                            "high"
-                                        ],
-                                        "example": "high"
+                                        "example": "medium"
                                     },
                                     "status": {
-                                        "description": "Task status",
                                         "type": "string",
                                         "example": "pending"
                                     },
                                     "repeats": {
-                                        "description": "Whether the task repeats",
-                                        "type": "boolean",
-                                        "example": false
+                                        "type": "string",
+                                        "example": "weekly"
                                     },
                                     "repeat_frequency": {
-                                        "description": "Repeat frequency",
-                                        "type": "string",
-                                        "example": "weekly",
-                                        "nullable": true
+                                        "type": "integer",
+                                        "example": 1
                                     },
                                     "end_repeat_date": {
-                                        "description": "End repeat date",
                                         "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-31",
-                                        "nullable": true
+                                        "example": "2025-04-30"
                                     }
                                 },
                                 "type": "object"
