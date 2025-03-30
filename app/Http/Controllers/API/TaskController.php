@@ -100,21 +100,21 @@ class TaskController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="title", type="string", example="Vaccination", description="Title of the task"),
-     *             @OA\Property(property="task_type", type="string", example="medical", description="Type of the task"),
-     *             @OA\Property(property="start_date", type="string", format="date", example="2025-03-25", description="Start date"),
-     *             @OA\Property(property="start_time", type="string", format="time", example="09:00:00", description="Start time"),
-     *             @OA\Property(property="end_date", type="string", format="date", nullable=true, example="2025-03-25", description="End date"),
-     *             @OA\Property(property="end_time", type="string", format="time", nullable=true, example="10:00:00", description="End time"),
+     *             @OA\Property(property="title", type="string", example="Meeting with Team", description="Title of the task"),
+     *             @OA\Property(property="task_type", type="string", example="health_check", description="Type of the task"),
+     *             @OA\Property(property="start_date", type="string", format="date", example="2025-03-15", description="Start date"),
+     *             @OA\Property(property="start_time", type="string", format="time", example="14:30", description="Start time"),
+     *             @OA\Property(property="end_date", type="string", format="date", example="2025-03-15", description="End date"),
+     *             @OA\Property(property="end_time", type="string", format="time", example="15:30", description="End time"),
      *             @OA\Property(property="duration", type="integer", example=60, description="Duration in minutes"),
-     *             @OA\Property(property="description", type="string", example="Administer vaccine", description="Task description"),
-     *             @OA\Property(property="health_notes", type="string", nullable=true, example="Monitor side effects", description="Health notes"),
-     *             @OA\Property(property="location", type="string", example="Barn A", description="Task location"),
-     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high"}, example="high", description="Priority level"),
+     *             @OA\Property(property="description", type="string", example="Discuss project progress and next steps", description="Task description"),
+     *             @OA\Property(property="health_notes", type="string", example="Remember to take a break afterward", description="Health notes"),
+     *             @OA\Property(property="location", type="string", example="Conference Room A", description="Task location"),
+     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high"}, example="medium", description="Priority level"),
      *             @OA\Property(property="status", type="string", example="pending", description="Task status"),
-     *             @OA\Property(property="repeats", type="boolean", example=false, description="Whether the task repeats"),
-     *             @OA\Property(property="repeat_frequency", type="string", nullable=true, example="weekly", description="Repeat frequency"),
-     *             @OA\Property(property="end_repeat_date", type="string", format="date", nullable=true, example="2025-12-31", description="End repeat date")
+     *             @OA\Property(property="repeats", type="string", example="weekly", description="Frequency of repetition (e.g., daily, weekly, monthly)"),
+     *             @OA\Property(property="repeat_frequency", type="integer", example=1, description="Number of times to repeat per frequency unit"),
+     *             @OA\Property(property="end_repeat_date", type="string", format="date", example="2025-04-30", description="End repeat date")
      *         )
      *     ),
      *     @OA\Response(
