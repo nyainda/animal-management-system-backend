@@ -157,14 +157,86 @@ class AnimalProductionController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="production_date", type="string", format="date", example="2025-03-24", description="Date of production"),
-     *             @OA\Property(property="production_time", type="string", format="time", example="10:00:00", description="Time of production"),
-     *             @OA\Property(property="yield_quantity", type="number", format="float", example=5.5, description="Quantity of yield"),
-     *             @OA\Property(property="unit", type="string", example="liters", description="Unit of measurement"),
-     *             @OA\Property(property="storage_location_id", type="string", format="uuid", example="6ba7b810-9dad-11d1-80b4-00c04fd430c8", description="UUID of the storage location"),
-     *             @OA\Property(property="production_method_id", type="string", format="uuid", example="7c9e6679-7425-40de-944b-e07fc1f90ae7", description="UUID of the production method"),
-     *             @OA\Property(property="product_grade_id", type="string", format="uuid", example="8f14e45f-ceea-41d4-a716-446655440000", description="UUID of the product grade"),
-     *             @OA\Property(property="product_category_id", type="string", format="uuid", example="9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", description="UUID of the product category")
+     *             @OA\Property(
+     *                 property="product_category",
+     *                 type="object",
+     *                 description="Details of the product category",
+     *                 @OA\Property(property="name", type="string", example="Milk", description="Category name"),
+     *                 @OA\Property(property="description", type="string", example="Fresh dairy product", description="Category description"),
+     *                 @OA\Property(property="measurement_unit", type="string", example="Liters", description="Unit of measurement")
+     *             ),
+     *             @OA\Property(
+     *                 property="product_grade",
+     *                 type="object",
+     *                 description="Details of the product grade",
+     *                 @OA\Property(property="name", type="string", example="Grade A", description="Grade name"),
+     *                 @OA\Property(property="description", type="string", example="Premium quality", description="Grade description"),
+     *                 @OA\Property(property="price_modifier", type="number", format="float", example=1.2, description="Price modifier")
+     *             ),
+     *             @OA\Property(
+     *                 property="production_method",
+     *                 type="object",
+     *                 description="Details of the production method",
+     *                 @OA\Property(property="method_name", type="string", example="Traditional Milking", description="Method name"),
+     *                 @OA\Property(property="description", type="string", example="Hand milking technique", description="Method description"),
+     *                 @OA\Property(property="requires_certification", type="boolean", example=true, description="Certification requirement"),
+     *                 @OA\Property(property="is_active", type="boolean", example=true, description="Active status")
+     *             ),
+     *             @OA\Property(
+     *                 property="collector",
+     *                 type="object",
+     *                 description="Details of the collector",
+     *                 @OA\Property(property="name", type="string", example="John Doe", description="Collector name"),
+     *                 @OA\Property(property="contact_info", type="string", example="+1 234 567 8901", description="Collector contact info")
+     *             ),
+     *             @OA\Property(
+     *                 property="storage_location",
+     *                 type="object",
+     *                 description="Details of the storage location",
+     *                 @OA\Property(property="name", type="string", example="Cold Storage 1", description="Storage name"),
+     *                 @OA\Property(property="location_code", type="string", example="CS-101", description="Storage location code"),
+     *                 @OA\Property(property="description", type="string", example="Primary refrigerated storage", description="Storage description"),
+     *                 @OA\Property(
+     *                     property="storage_conditions",
+     *                     type="array",
+     *                     description="List of storage conditions",
+     *                     @OA\Items(type="string", example="Temperature controlled")
+     *                 ),
+     *                 @OA\Property(property="is_active", type="boolean", example=true, description="Active status")
+     *             ),
+     *             @OA\Property(property="quantity", type="number", format="float", example=100.5, description="Production quantity"),
+     *             @OA\Property(property="price_per_unit", type="number", format="float", example=2.50, description="Price per unit"),
+     *             @OA\Property(property="total_price", type="number", format="float", example=251.25, description="Total price"),
+     *             @OA\Property(property="production_date", type="string", format="date", example="2025-03-12", description="Date of production"),
+     *             @OA\Property(property="production_time", type="string", example="14:30", description="Time of production"),
+     *             @OA\Property(property="quality_status", type="string", example="Passed", description="Quality status"),
+     *             @OA\Property(property="quality_notes", type="string", example="Meets all standard requirements", description="Quality notes"),
+     *             @OA\Property(property="trace_number", type="string", example="TR-123456", description="Traceability number"),
+     *             @OA\Property(
+     *                 property="weather_conditions",
+     *                 type="object",
+     *                 description="Weather conditions during production",
+     *                 @OA\Property(property="temperature", type="number", format="float", example=22.5, description="Temperature in Celsius"),
+     *                 @OA\Property(property="humidity", type="integer", example=65, description="Humidity percentage")
+     *             ),
+     *             @OA\Property(
+     *                 property="storage_conditions",
+     *                 type="object",
+     *                 description="Storage conditions",
+     *                 @OA\Property(property="temperature", type="number", format="float", example=4.0, description="Storage temperature in Celsius"),
+     *                 @OA\Property(property="humidity", type="integer", example=70, description="Storage humidity percentage")
+     *             ),
+     *             @OA\Property(property="is_organic", type="boolean", example=true, description="Organic status"),
+     *             @OA\Property(property="certification_number", type="string", example="ORG-987654", description="Certification number"),
+     *             @OA\Property(
+     *                 property="additional_attributes",
+     *                 type="object",
+     *                 description="Additional product attributes",
+     *                 @OA\Property(property="fat_content", type="string", example="3.5%", description="Fat content"),
+     *                 @OA\Property(property="pasteurized", type="string", example="Yes", description="Pasteurization status"),
+     *                 @OA\Property(property="homogenized", type="string", example="Yes", description="Homogenization status")
+     *             ),
+     *             @OA\Property(property="notes", type="string", example="Batch processed according to standard protocols.", description="Additional notes")
      *         )
      *     ),
      *     @OA\Response(

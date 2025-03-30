@@ -1388,52 +1388,238 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
+                                    "product_category": {
+                                        "description": "Details of the product category",
+                                        "properties": {
+                                            "name": {
+                                                "description": "Category name",
+                                                "type": "string",
+                                                "example": "Milk"
+                                            },
+                                            "description": {
+                                                "description": "Category description",
+                                                "type": "string",
+                                                "example": "Fresh dairy product"
+                                            },
+                                            "measurement_unit": {
+                                                "description": "Unit of measurement",
+                                                "type": "string",
+                                                "example": "Liters"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "product_grade": {
+                                        "description": "Details of the product grade",
+                                        "properties": {
+                                            "name": {
+                                                "description": "Grade name",
+                                                "type": "string",
+                                                "example": "Grade A"
+                                            },
+                                            "description": {
+                                                "description": "Grade description",
+                                                "type": "string",
+                                                "example": "Premium quality"
+                                            },
+                                            "price_modifier": {
+                                                "description": "Price modifier",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 1.2
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "production_method": {
+                                        "description": "Details of the production method",
+                                        "properties": {
+                                            "method_name": {
+                                                "description": "Method name",
+                                                "type": "string",
+                                                "example": "Traditional Milking"
+                                            },
+                                            "description": {
+                                                "description": "Method description",
+                                                "type": "string",
+                                                "example": "Hand milking technique"
+                                            },
+                                            "requires_certification": {
+                                                "description": "Certification requirement",
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "is_active": {
+                                                "description": "Active status",
+                                                "type": "boolean",
+                                                "example": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "collector": {
+                                        "description": "Details of the collector",
+                                        "properties": {
+                                            "name": {
+                                                "description": "Collector name",
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "contact_info": {
+                                                "description": "Collector contact info",
+                                                "type": "string",
+                                                "example": "+1 234 567 8901"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "storage_location": {
+                                        "description": "Details of the storage location",
+                                        "properties": {
+                                            "name": {
+                                                "description": "Storage name",
+                                                "type": "string",
+                                                "example": "Cold Storage 1"
+                                            },
+                                            "location_code": {
+                                                "description": "Storage location code",
+                                                "type": "string",
+                                                "example": "CS-101"
+                                            },
+                                            "description": {
+                                                "description": "Storage description",
+                                                "type": "string",
+                                                "example": "Primary refrigerated storage"
+                                            },
+                                            "storage_conditions": {
+                                                "description": "List of storage conditions",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "example": "Temperature controlled"
+                                                }
+                                            },
+                                            "is_active": {
+                                                "description": "Active status",
+                                                "type": "boolean",
+                                                "example": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "quantity": {
+                                        "description": "Production quantity",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100.5
+                                    },
+                                    "price_per_unit": {
+                                        "description": "Price per unit",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.5
+                                    },
+                                    "total_price": {
+                                        "description": "Total price",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 251.25
+                                    },
                                     "production_date": {
                                         "description": "Date of production",
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2025-03-24"
+                                        "example": "2025-03-12"
                                     },
                                     "production_time": {
                                         "description": "Time of production",
                                         "type": "string",
-                                        "format": "time",
-                                        "example": "10:00:00"
+                                        "example": "14:30"
                                     },
-                                    "yield_quantity": {
-                                        "description": "Quantity of yield",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 5.5
-                                    },
-                                    "unit": {
-                                        "description": "Unit of measurement",
+                                    "quality_status": {
+                                        "description": "Quality status",
                                         "type": "string",
-                                        "example": "liters"
+                                        "example": "Passed"
                                     },
-                                    "storage_location_id": {
-                                        "description": "UUID of the storage location",
+                                    "quality_notes": {
+                                        "description": "Quality notes",
                                         "type": "string",
-                                        "format": "uuid",
-                                        "example": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+                                        "example": "Meets all standard requirements"
                                     },
-                                    "production_method_id": {
-                                        "description": "UUID of the production method",
+                                    "trace_number": {
+                                        "description": "Traceability number",
                                         "type": "string",
-                                        "format": "uuid",
-                                        "example": "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+                                        "example": "TR-123456"
                                     },
-                                    "product_grade_id": {
-                                        "description": "UUID of the product grade",
-                                        "type": "string",
-                                        "format": "uuid",
-                                        "example": "8f14e45f-ceea-41d4-a716-446655440000"
+                                    "weather_conditions": {
+                                        "description": "Weather conditions during production",
+                                        "properties": {
+                                            "temperature": {
+                                                "description": "Temperature in Celsius",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 22.5
+                                            },
+                                            "humidity": {
+                                                "description": "Humidity percentage",
+                                                "type": "integer",
+                                                "example": 65
+                                            }
+                                        },
+                                        "type": "object"
                                     },
-                                    "product_category_id": {
-                                        "description": "UUID of the product category",
+                                    "storage_conditions": {
+                                        "description": "Storage conditions",
+                                        "properties": {
+                                            "temperature": {
+                                                "description": "Storage temperature in Celsius",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 4
+                                            },
+                                            "humidity": {
+                                                "description": "Storage humidity percentage",
+                                                "type": "integer",
+                                                "example": 70
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "is_organic": {
+                                        "description": "Organic status",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "certification_number": {
+                                        "description": "Certification number",
                                         "type": "string",
-                                        "format": "uuid",
-                                        "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+                                        "example": "ORG-987654"
+                                    },
+                                    "additional_attributes": {
+                                        "description": "Additional product attributes",
+                                        "properties": {
+                                            "fat_content": {
+                                                "description": "Fat content",
+                                                "type": "string",
+                                                "example": "3.5%"
+                                            },
+                                            "pasteurized": {
+                                                "description": "Pasteurization status",
+                                                "type": "string",
+                                                "example": "Yes"
+                                            },
+                                            "homogenized": {
+                                                "description": "Homogenization status",
+                                                "type": "string",
+                                                "example": "Yes"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "notes": {
+                                        "description": "Additional notes",
+                                        "type": "string",
+                                        "example": "Batch processed according to standard protocols."
                                     }
                                 },
                                 "type": "object"
