@@ -2369,13 +2369,6 @@
                                         "type": "string",
                                         "example": "Up-to-date"
                                     },
-                                    "vet_contact_id": {
-                                        "description": "Vet contact ID",
-                                        "type": "string",
-                                        "format": "uuid",
-                                        "example": "123e4567-e89b-12d3-a456-426614174000",
-                                        "nullable": true
-                                    },
                                     "medical_history": {
                                         "description": "Medical history as key-value pairs",
                                         "type": "object",
@@ -2384,65 +2377,10 @@
                                         },
                                         "nullable": true
                                     },
-                                    "dietary_restrictions": {
-                                        "description": "Dietary restrictions",
-                                        "type": "string",
-                                        "example": "No dairy",
-                                        "nullable": true
-                                    },
                                     "neutered_spayed": {
                                         "description": "Neutered or spayed status",
                                         "type": "boolean",
                                         "example": true
-                                    },
-                                    "regular_medication": {
-                                        "description": "Regular medication",
-                                        "type": "string",
-                                        "example": "Daily vitamin supplement",
-                                        "nullable": true
-                                    },
-                                    "last_vet_visit": {
-                                        "description": "Last vet visit date",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-03-20",
-                                        "nullable": true
-                                    },
-                                    "insurance_details": {
-                                        "description": "Insurance details",
-                                        "type": "string",
-                                        "example": "Policy #12345",
-                                        "nullable": true
-                                    },
-                                    "exercise_requirements": {
-                                        "description": "Exercise requirements",
-                                        "type": "string",
-                                        "example": "30 min walk daily",
-                                        "nullable": true
-                                    },
-                                    "parasite_prevention": {
-                                        "description": "Parasite prevention",
-                                        "type": "string",
-                                        "example": "Monthly flea treatment",
-                                        "nullable": true
-                                    },
-                                    "vaccinations": {
-                                        "description": "Vaccination details",
-                                        "type": "string",
-                                        "example": "Rabies: 2025-01-01",
-                                        "nullable": true
-                                    },
-                                    "allergies": {
-                                        "description": "Allergies",
-                                        "type": "string",
-                                        "example": "Peanuts",
-                                        "nullable": true
-                                    },
-                                    "notes": {
-                                        "description": "Additional notes",
-                                        "type": "string",
-                                        "example": "Monitor weight",
-                                        "nullable": true
                                     }
                                 },
                                 "type": "object"

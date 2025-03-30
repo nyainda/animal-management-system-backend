@@ -157,7 +157,6 @@ class HealthController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="health_status", type="string", example="Healthy", description="Health status"),
      *             @OA\Property(property="vaccination_status", type="string", example="Up-to-date", description="Vaccination status"),
-     *             @OA\Property(property="vet_contact_id", type="string", format="uuid", nullable=true, example="123e4567-e89b-12d3-a456-426614174000", description="Vet contact ID"),
      *             @OA\Property(
      *                 property="medical_history",
      *                 type="object",
@@ -165,16 +164,7 @@ class HealthController extends Controller
      *                 description="Medical history as key-value pairs",
      *                 example={"2023-10-01": "Routine checkup"}
      *             ),
-     *             @OA\Property(property="dietary_restrictions", type="string", nullable=true, example="No dairy", description="Dietary restrictions"),
-     *             @OA\Property(property="neutered_spayed", type="boolean", example=true, description="Neutered or spayed status"),
-     *             @OA\Property(property="regular_medication", type="string", nullable=true, example="Daily vitamin supplement", description="Regular medication"),
-     *             @OA\Property(property="last_vet_visit", type="string", format="date", nullable=true, example="2025-03-20", description="Last vet visit date"),
-     *             @OA\Property(property="insurance_details", type="string", nullable=true, example="Policy #12345", description="Insurance details"),
-     *             @OA\Property(property="exercise_requirements", type="string", nullable=true, example="30 min walk daily", description="Exercise requirements"),
-     *             @OA\Property(property="parasite_prevention", type="string", nullable=true, example="Monthly flea treatment", description="Parasite prevention"),
-     *             @OA\Property(property="vaccinations", type="string", nullable=true, example="Rabies: 2025-01-01", description="Vaccination details"),
-     *             @OA\Property(property="allergies", type="string", nullable=true, example="Peanuts", description="Allergies"),
-     *             @OA\Property(property="notes", type="string", nullable=true, example="Monitor weight", description="Additional notes")
+     *             @OA\Property(property="neutered_spayed", type="boolean", example=true, description="Neutered or spayed status")
      *         )
      *     ),
      *     @OA\Response(
