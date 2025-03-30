@@ -179,9 +179,20 @@
     <div id="swagger-ui"></div>
 
     <script src="{{ l5_swagger_asset($documentation, 'swagger-ui-bundle.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="{{ l5_swagger_asset($documentation, 'swagger-ui-standalone-preset.js') }}"></script>
     <script>
         window.onload = function() {
+            // Fetch CSRF cookie on page load
+            fetch('/sanctum/csrf-cookie', {
+                method: 'GET',
+                credentials: 'include' // Ensure cookies are sent and received
+            }).then(() => {
+                console.log('CSRF cookie fetched successfully');
+            }).catch(err => {
+                console.error('Failed to fetch CSRF cookie:', err);
+            });
+
             const urls = [];
 
             @foreach($urlsToDocs as $title => $url)
@@ -197,7 +208,8 @@
                 validatorUrl: {!! isset($validatorUrl) ? '"' . $validatorUrl . '"' : 'null' !!},
                 oauth2RedirectUrl: "{{ route('l5-swagger.'.$documentation.'.oauth2_callback', [], $useAbsolutePath) }}",
                 requestInterceptor: function(request) {
-                    request.headers['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
+                    request.headers['accept'] = 'application/json';
+                    request.headers['X-XSRF-TOKEN'] = Cookies.get('XSRF-TOKEN');
                     return request;
                 },
                 presets: [
