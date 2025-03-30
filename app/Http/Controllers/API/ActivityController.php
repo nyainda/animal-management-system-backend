@@ -43,7 +43,7 @@ class ActivityController extends Controller
      *         in="path",
      *         required=true,
      *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Parameter(
      *         name="type",
@@ -76,7 +76,15 @@ class ActivityController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="List of activities",
-     *         @OA\JsonContent(ref="#/components/schemas/PaginatedActivityResource")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ActivityResource")),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="per_page", type="integer", example=15),
+     *                 @OA\Property(property="total", type="integer", example=50)
+     *             )
+     *         )
      *     ),
      *     @OA\Response(
      *         response=401,
@@ -119,16 +127,17 @@ class ActivityController extends Controller
      *         in="path",
      *         required=true,
      *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
+     *             required={"activity_type", "activity_date"},
      *             @OA\Property(property="activity_type", type="string", example="feeding", description="Type of activity"),
-     *             @OA\Property(property="activity_date", type="string", format="date", example="2025-03-24", description="Date of the activity"),
+     *             @OA\Property(property="activity_date", type="string", format="date", example="2025-03-30", description="Date of the activity"),
      *             @OA\Property(property="description", type="string", example="Fed the animal with grain", description="Activity description"),
      *             @OA\Property(property="notes", type="string", nullable=true, example="Animal seemed healthy", description="Additional notes"),
-     *             @OA\Property(property="breeding_date", type="string", format="date", nullable=true, example="2025-03-24", description="Breeding date, if applicable"),
+     *             @OA\Property(property="breeding_date", type="string", format="date", nullable=true, example="2025-03-30", description="Breeding date, if applicable"),
      *             @OA\Property(property="breeding_notes", type="string", nullable=true, example="Successful breeding", description="Breeding-specific notes")
      *         )
      *     ),
@@ -171,7 +180,7 @@ class ActivityController extends Controller
         $activity = $animal->activities()->create([
             ...$validatedData,
             'user_id' => Auth::id(),
-            'is_automatic' => false
+            'is_automatic' => false,
         ]);
 
         return $this->successResponse(
@@ -194,14 +203,14 @@ class ActivityController extends Controller
      *         in="path",
      *         required=true,
      *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Parameter(
      *         name="activity",
      *         in="path",
      *         required=true,
      *         description="UUID of the activity",
-     *         @OA\Schema(type="string", format="uuid", example="6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -230,6 +239,11 @@ class ActivityController extends Controller
      */
     public function show(Animal $animal, AnimalActivity $activity)
     {
+        // Ensure the activity belongs to the specified animal
+        if ($activity->animal_id !== $animal->id) {
+            return $this->errorResponse('Activity not found for this animal', 404);
+        }
+
         return $this->successResponse(
             new ActivityResource($activity),
             'Activity retrieved successfully'
@@ -249,14 +263,14 @@ class ActivityController extends Controller
      *         in="path",
      *         required=true,
      *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Parameter(
      *         name="activity",
      *         in="path",
      *         required=true,
      *         description="UUID of the activity",
-     *         @OA\Schema(type="string", format="uuid", example="6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -292,7 +306,14 @@ class ActivityController extends Controller
      */
     public function destroy(Animal $animal, AnimalActivity $activity)
     {
-        abort_if($activity->is_automatic, 403, 'Cannot delete automatic activities');
+        // Ensure the activity belongs to the specified animal
+        if ($activity->animal_id !== $animal->id) {
+            return $this->errorResponse('Activity not found for this animal', 404);
+        }
+
+        if ($activity->is_automatic) {
+            return $this->errorResponse('Cannot delete automatic activities', 403);
+        }
 
         $activity->delete();
 
@@ -337,11 +358,14 @@ class ActivityController extends Controller
      */
     public function generateBirthdayActivities()
     {
-        $this->activityService->generateBirthdayActivities();
-
-        return $this->successResponse(
-            null,
-            'Birthday activities generated successfully'
-        );
+        try {
+            $this->activityService->generateBirthdayActivities();
+            return $this->successResponse(
+                null,
+                'Birthday activities generated successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to generate birthday activities', 500);
+        }
     }
 }
