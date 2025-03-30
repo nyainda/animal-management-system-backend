@@ -2206,14 +2206,14 @@
                 ]
             }
         },
-        "/api/animals/{animal}/production/statistics": {
+        "/api/animals/{animal}/production-statistics": {
             "get": {
                 "tags": [
                     "Production Records"
                 ],
                 "summary": "Get production statistics for an animal",
                 "description": "Get production statistics for an animal.",
-                "operationId": "b1ca58c3efb1b114c575e759c3800e17",
+                "operationId": "9d80a2d9da97bc6992f012ebf6e75550",
                 "parameters": [
                     {
                         "name": "animal",
@@ -4427,50 +4427,43 @@
                                     "name": {
                                         "description": "Supplier name",
                                         "type": "string",
-                                        "example": "Farm Supplies Inc."
+                                        "example": "Supplier Name"
                                     },
                                     "email": {
                                         "description": "Supplier email",
                                         "type": "string",
                                         "format": "email",
-                                        "example": "contact@farmsupplies.com"
+                                        "example": "supplier29@example.com"
                                     },
                                     "phone": {
                                         "description": "Supplier phone",
                                         "type": "string",
-                                        "example": "+1234567890"
-                                    },
-                                    "website": {
-                                        "description": "Supplier website",
-                                        "type": "string",
-                                        "example": "https://farmsupplies.com",
-                                        "nullable": true
+                                        "example": "9223-456-7890"
                                     },
                                     "tax_number": {
                                         "description": "Tax number",
                                         "type": "string",
-                                        "example": "TAX123456",
-                                        "nullable": true
+                                        "example": "TNr8123456"
                                     },
                                     "address": {
                                         "description": "Address",
                                         "type": "string",
-                                        "example": "123 Farm Road"
+                                        "example": "123 Main St"
                                     },
                                     "city": {
                                         "description": "City",
                                         "type": "string",
-                                        "example": "Springfield"
+                                        "example": "Anytown"
                                     },
                                     "state": {
                                         "description": "State",
                                         "type": "string",
-                                        "example": "IL"
+                                        "example": "CA"
                                     },
                                     "postal_code": {
                                         "description": "Postal code",
                                         "type": "string",
-                                        "example": "62701"
+                                        "example": "90210"
                                     },
                                     "country": {
                                         "description": "Country",
@@ -4481,92 +4474,80 @@
                                         "description": "Latitude",
                                         "type": "number",
                                         "format": "float",
-                                        "example": 39.7817,
-                                        "nullable": true
+                                        "example": 34.0522
                                     },
                                     "longitude": {
                                         "description": "Longitude",
                                         "type": "number",
                                         "format": "float",
-                                        "example": -89.6501,
-                                        "nullable": true
+                                        "example": -118.2437
                                     },
                                     "type": {
                                         "description": "Supplier type",
                                         "type": "string",
-                                        "example": "vendor"
+                                        "example": "feed"
                                     },
                                     "product_type": {
                                         "description": "Product type",
                                         "type": "string",
-                                        "example": "feed"
+                                        "example": "Animal Feed"
                                     },
                                     "shop_name": {
                                         "description": "Shop name",
                                         "type": "string",
-                                        "example": "Farm Store",
-                                        "nullable": true
+                                        "example": "Example Feed Supply"
                                     },
                                     "business_registration_number": {
                                         "description": "Business registration number",
                                         "type": "string",
-                                        "example": "BRN789123",
-                                        "nullable": true
+                                        "example": "BRN17293456"
                                     },
                                     "contract_start_date": {
                                         "description": "Contract start date",
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2025-01-01",
-                                        "nullable": true
+                                        "example": "2024-01-01"
                                     },
                                     "contract_end_date": {
                                         "description": "Contract end date",
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2025-12-31",
-                                        "nullable": true
+                                        "example": "2025-01-01"
                                     },
                                     "account_holder": {
                                         "description": "Account holder",
                                         "type": "string",
-                                        "example": "Farm Supplies Inc.",
-                                        "nullable": true
+                                        "example": "John Doe"
                                     },
                                     "account_number": {
                                         "description": "Account number",
                                         "type": "string",
-                                        "example": "1234567890",
-                                        "nullable": true
+                                        "example": "1234567890"
                                     },
                                     "bank_name": {
                                         "description": "Bank name",
                                         "type": "string",
-                                        "example": "First National Bank",
-                                        "nullable": true
+                                        "example": "Example Bank"
                                     },
                                     "bank_branch": {
                                         "description": "Bank branch",
                                         "type": "string",
-                                        "example": "Springfield Branch",
-                                        "nullable": true
+                                        "example": "Main Branch"
                                     },
                                     "swift_code": {
                                         "description": "SWIFT code",
                                         "type": "string",
-                                        "example": "FNUS33XXX",
-                                        "nullable": true
+                                        "example": "EXMPL123"
                                     },
                                     "iban": {
                                         "description": "IBAN",
                                         "type": "string",
-                                        "example": "US12345678901234567890",
-                                        "nullable": true
+                                        "example": "IBAN1234567890"
                                     },
                                     "supplier_importance": {
                                         "description": "Supplier importance",
                                         "type": "string",
-                                        "example": "high"
+                                        "example": "medium"
                                     },
                                     "inventory_level": {
                                         "description": "Inventory level",
@@ -4576,28 +4557,28 @@
                                     "reorder_point": {
                                         "description": "Reorder point",
                                         "type": "integer",
-                                        "example": 20
+                                        "example": 50
                                     },
                                     "minimum_order_quantity": {
                                         "description": "Minimum order quantity",
                                         "type": "integer",
-                                        "example": 50
+                                        "example": 20
                                     },
                                     "lead_time_days": {
                                         "description": "Lead time in days",
                                         "type": "integer",
-                                        "example": 5
+                                        "example": 7
                                     },
                                     "payment_terms": {
                                         "description": "Payment terms",
                                         "type": "string",
-                                        "example": "Net 30"
+                                        "example": "net30"
                                     },
                                     "credit_limit": {
                                         "description": "Credit limit",
                                         "type": "number",
                                         "format": "float",
-                                        "example": 5000
+                                        "example": 10000
                                     },
                                     "currency": {
                                         "description": "Currency",
@@ -4608,7 +4589,7 @@
                                         "description": "Tax rate",
                                         "type": "number",
                                         "format": "float",
-                                        "example": 0.08
+                                        "example": 10
                                     },
                                     "supplier_rating": {
                                         "description": "Supplier rating",
@@ -4624,91 +4605,44 @@
                                     "notes": {
                                         "description": "Notes",
                                         "type": "string",
-                                        "example": "Reliable supplier",
-                                        "nullable": true
+                                        "example": "Some notes about the supplier."
+                                    },
+                                    "meta_data": {
+                                        "description": "Additional metadata for the supplier",
+                                        "properties": {
+                                            "key1": {
+                                                "description": "Custom key-value pair",
+                                                "type": "string",
+                                                "example": "value1"
+                                            },
+                                            "key2": {
+                                                "description": "Custom key-value pair",
+                                                "type": "string",
+                                                "example": "value2"
+                                            }
+                                        },
+                                        "type": "object"
                                     },
                                     "contact_name": {
                                         "description": "Primary contact name",
                                         "type": "string",
-                                        "example": "Jane Doe"
+                                        "example": "Jane Smith"
                                     },
                                     "contact_position": {
                                         "description": "Primary contact position",
                                         "type": "string",
-                                        "example": "Sales Manager",
-                                        "nullable": true
+                                        "example": "Sales Manager"
                                     },
                                     "contact_email": {
                                         "description": "Primary contact email",
                                         "type": "string",
                                         "format": "email",
-                                        "example": "jane@farmsupplies.com",
-                                        "nullable": true
+                                        "example": "jane.smith@example.com"
                                     },
                                     "contact_phone": {
                                         "description": "Primary contact phone",
                                         "type": "string",
-                                        "example": "+1234567891",
-                                        "nullable": true
-                                    },
-                                    "additional_contacts": {
-                                        "description": "Additional supplier contacts",
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "name": {
-                                                    "description": "Contact name",
-                                                    "type": "string",
-                                                    "example": "John Smith"
-                                                },
-                                                "position": {
-                                                    "description": "Contact position",
-                                                    "type": "string",
-                                                    "example": "Assistant Manager",
-                                                    "nullable": true
-                                                },
-                                                "email": {
-                                                    "description": "Contact email",
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "john@farmsupplies.com",
-                                                    "nullable": true
-                                                },
-                                                "phone": {
-                                                    "description": "Contact phone",
-                                                    "type": "string",
-                                                    "example": "+1234567892",
-                                                    "nullable": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "nullable": true
-                                    },
-                                    "relationship_type": {
-                                        "description": "Type of relationship with the animal",
-                                        "type": "string",
-                                        "example": "primary"
-                                    },
-                                    "start_date": {
-                                        "description": "Relationship start date",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-01-01",
-                                        "nullable": true
-                                    },
-                                    "end_date": {
-                                        "description": "Relationship end date",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-31",
-                                        "nullable": true
-                                    },
-                                    "relationship_notes": {
-                                        "description": "Notes about the relationship",
-                                        "type": "string",
-                                        "example": "Main feed supplier",
-                                        "nullable": true
+                                        "example": "987-654-3210"
                                     }
                                 },
                                 "type": "object"

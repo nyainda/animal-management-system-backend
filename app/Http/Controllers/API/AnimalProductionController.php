@@ -582,7 +582,7 @@ class AnimalProductionController extends Controller
      * Get production statistics for an animal.
      *
      * @OA\Get(
-     *     path="/api/animals/{animal}/production/statistics",
+     *     path="/api/animals/{animal}/production-statistics",
      *     tags={"Production Records"},
      *     summary="Get production statistics for an animal",
      *     security={{"bearerAuth": {}}},
