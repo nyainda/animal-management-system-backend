@@ -319,4 +319,8 @@ return [
             'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
         ],
     ],
+
+    'exclude' => [
+    base_path('app/Http/Resources/BreedingResource.php'),
+],
 ];
