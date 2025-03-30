@@ -7690,7 +7690,7 @@
                     "Authentication"
                 ],
                 "summary": "Register a new user",
-                "description": "Handle user registration and return user data.",
+                "description": "Creates a new user account. This endpoint is exempt from CSRF protection.",
                 "operationId": "18235ea6963e661c49bf381065779d6a",
                 "requestBody": {
                     "required": true,
@@ -7760,6 +7760,14 @@
                                                     "type": "string",
                                                     "example": "http://domain/storage/avatars/avatar.jpg",
                                                     "nullable": true
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abcdefghijklmnopqrstuvwxyz"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
                                                 }
                                             },
                                             "type": "object"
@@ -7823,7 +7831,8 @@
                             }
                         }
                     }
-                }
+                },
+                "security": []
             }
         },
         "/api/verify-email/{id}/{hash}": {

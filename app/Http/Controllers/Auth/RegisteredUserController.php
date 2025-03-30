@@ -23,6 +23,8 @@ class RegisteredUserController extends Controller
      *     path="/api/register",
      *     tags={"Authentication"},
      *     summary="Register a new user",
+     *     description="Creates a new user account. This endpoint is exempt from CSRF protection.",
+     *     security={},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
@@ -47,7 +49,9 @@ class RegisteredUserController extends Controller
      *                 @OA\Property(property="id", type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000"),
      *                 @OA\Property(property="name", type="string", example="John Doe"),
      *                 @OA\Property(property="email", type="string", example="user@example.com"),
-     *                 @OA\Property(property="avatar", type="string", nullable=true, example="http://domain/storage/avatars/avatar.jpg")
+     *                 @OA\Property(property="avatar", type="string", nullable=true, example="http://domain/storage/avatars/avatar.jpg"),
+     *                 @OA\Property(property="token", type="string", example="1|abcdefghijklmnopqrstuvwxyz"),
+     *                 @OA\Property(property="token_type", type="string", example="Bearer")
      *             )
      *         )
      *     ),
@@ -125,8 +129,8 @@ class RegisteredUserController extends Controller
                 // Continue even if event or login fails, as user is already created
             }
 
-            // Optionally generate a Sanctum token (uncomment if needed)
-            // $token = $user->createToken('auth_token')->plainTextToken;
+            // Generate a Sanctum token for API usage
+            $token = $user->createToken('auth_token')->plainTextToken;
 
             // Return success response
             return response()->json([
@@ -136,8 +140,8 @@ class RegisteredUserController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'avatar' => $avatarPath ? asset('storage/' . $avatarPath) : null,
-                    // 'token' => $token, // Uncomment if token is generated
-                    // 'token_type' => 'Bearer', // Uncomment if token is generated
+                    'token' => $token,
+                    'token_type' => 'Bearer',
                 ]
             ], 201);
 
