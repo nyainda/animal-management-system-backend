@@ -694,68 +694,70 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Bessie"
+                                        "example": "New Animal"
                                     },
                                     "type": {
                                         "type": "string",
-                                        "example": "Cow"
+                                        "example": "cattle"
                                     },
                                     "breed": {
                                         "type": "string",
-                                        "example": "Holstein"
+                                        "example": "Angus"
                                     },
-                                    "status": {
+                                    "gender": {
                                         "type": "string",
-                                        "example": "active"
-                                    },
-                                    "tag_number": {
-                                        "type": "string",
-                                        "example": "A123"
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
                                     },
                                     "birth_date": {
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2023-01-15"
+                                        "example": "2024-01-01"
                                     },
-                                    "gender": {
+                                    "birth_time": {
                                         "type": "string",
-                                        "example": "female"
+                                        "format": "date-time",
+                                        "example": "2024-01-01 08:00:00"
                                     },
-                                    "weight": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 650.5
-                                    },
-                                    "height": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 1.4
-                                    },
-                                    "is_breeding_stock": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "internal_id": {
+                                    "birth_status": {
                                         "type": "string",
-                                        "example": "INT-001"
+                                        "example": "normal"
                                     },
-                                    "birth_details": {
-                                        "properties": {
-                                            "birth_weight": {
-                                                "type": "number",
-                                                "format": "float",
-                                                "example": 40.5
+                                    "health_at_birth": {
+                                        "type": "string",
+                                        "example": "healthy"
+                                    },
+                                    "relationships": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "related_animal_id": {
+                                                    "type": "string",
+                                                    "example": "uuid-of-dam"
+                                                },
+                                                "relationship_type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "dam",
+                                                        "sire"
+                                                    ],
+                                                    "example": "dam"
+                                                },
+                                                "breeding_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-04-01"
+                                                },
+                                                "breeding_notes": {
+                                                    "type": "string",
+                                                    "example": "Natural breeding"
+                                                }
                                             },
-                                            "birth_status": {
-                                                "type": "string",
-                                                "example": "healthy"
-                                            },
-                                            "health_at_birth": {
-                                                "type": "string",
-                                                "example": "good"
-                                            }
-                                        },
-                                        "type": "object"
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"

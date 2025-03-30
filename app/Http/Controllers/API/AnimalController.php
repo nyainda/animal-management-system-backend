@@ -248,61 +248,65 @@ class AnimalController extends Controller
         }
     }
 
+
+
     /**
-     * @OA\Post(
-     *     path="/api/animals",
-     *     summary="Create a new animal",
-     *     tags={"Animals"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Bessie"),
-     *             @OA\Property(property="type", type="string", example="Cow"),
-     *             @OA\Property(property="breed", type="string", example="Holstein"),
-     *             @OA\Property(property="status", type="string", example="active"),
-     *             @OA\Property(property="tag_number", type="string", example="A123"),
-     *             @OA\Property(property="birth_date", type="string", format="date", example="2023-01-15"),
-     *             @OA\Property(property="gender", type="string", example="female"),
-     *             @OA\Property(property="weight", type="number", format="float", example=650.5),
-     *             @OA\Property(property="height", type="number", format="float", example=1.4),
-     *             @OA\Property(property="is_breeding_stock", type="boolean", example=true),
-     *             @OA\Property(property="internal_id", type="string", example="INT-001"),
-     *             @OA\Property(
-     *                 property="birth_details",
-     *                 type="object",
-     *                 @OA\Property(property="birth_weight", type="number", format="float", example=40.5),
-     *                 @OA\Property(property="birth_status", type="string", example="healthy"),
-     *                 @OA\Property(property="health_at_birth", type="string", example="good")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Animal created",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", ref="#/components/schemas/AnimalWithDetails"),
-     *             @OA\Property(property="message", type="string", example="Animal created successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid"),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to store animal"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
-     *         )
-     *     )
-     * )
-     */
-    public function store(StoreAnimalRequest $request): JsonResponse
+ * @OA\Post(
+ *     path="/api/animals",
+ *     summary="Create a new animal",
+ *     tags={"Animals"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", example="New Animal"),
+ *             @OA\Property(property="type", type="string", example="cattle"),
+ *             @OA\Property(property="breed", type="string", example="Angus"),
+ *             @OA\Property(property="gender", type="string", example="male", enum={"male", "female"}),
+ *             @OA\Property(property="birth_date", type="string", format="date", example="2024-01-01"),
+ *             @OA\Property(property="birth_time", type="string", format="date-time", example="2024-01-01 08:00:00"),
+ *             @OA\Property(property="birth_status", type="string", example="normal"),
+ *             @OA\Property(property="health_at_birth", type="string", example="healthy"),
+ *             @OA\Property(
+ *                 property="relationships",
+ *                 type="array",
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="related_animal_id", type="string", example="uuid-of-dam"),
+ *                     @OA\Property(property="relationship_type", type="string", example="dam", enum={"dam", "sire"}),
+ *                     @OA\Property(property="breeding_date", type="string", format="date", example="2023-04-01"),
+ *                     @OA\Property(property="breeding_notes", type="string", example="Natural breeding")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Animal created",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="data", ref="#/components/schemas/AnimalWithDetails"),
+ *             @OA\Property(property="message", type="string", example="Animal created successfully")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The given data was invalid"),
+ *             @OA\Property(property="errors", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Server error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Failed to store animal"),
+ *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+ *         )
+ *     )
+ * )
+ */
+
+      public function store(StoreAnimalRequest $request): JsonResponse
     {
         try {
             return DB::transaction(function () use ($request) {
