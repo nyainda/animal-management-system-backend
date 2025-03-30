@@ -3370,7 +3370,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Tasks retrieved successfully"
+                                            "example": "Notes retrieved successfully"
                                         },
                                         "status": {
                                             "type": "string",
@@ -3447,15 +3447,51 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "title": {
-                                        "description": "Title of the note",
+                                    "content": {
+                                        "description": "Main content of the note",
                                         "type": "string",
-                                        "example": "Feeding Schedule"
+                                        "example": "Important meeting notes from the quarterly review"
                                     },
-                                    "description": {
-                                        "description": "Description of the note",
+                                    "category": {
+                                        "description": "Category of the note",
                                         "type": "string",
-                                        "example": "Feed twice daily"
+                                        "example": "Business"
+                                    },
+                                    "keywords": {
+                                        "description": "Keywords associated with the note",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "meeting",
+                                            "quarterly",
+                                            "review",
+                                            "finances"
+                                        ]
+                                    },
+                                    "file_path": {
+                                        "description": "Path to attached file",
+                                        "type": "string",
+                                        "example": "/uploads/documents/meeting_notes_q1.pdf",
+                                        "nullable": true
+                                    },
+                                    "add_to_calendar": {
+                                        "description": "Whether to add to calendar",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "description": "Status of the note",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "pending",
+                                        "nullable": true
                                     },
                                     "priority": {
                                         "description": "Priority level",
@@ -3465,7 +3501,15 @@
                                             "medium",
                                             "high"
                                         ],
-                                        "example": "medium"
+                                        "example": "high",
+                                        "nullable": true
+                                    },
+                                    "due_date": {
+                                        "description": "Due date for the note",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-04-01",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3485,7 +3529,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Task created successfully"
+                                            "example": "Note created successfully"
                                         },
                                         "status": {
                                             "type": "string",
@@ -3556,7 +3600,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to create task"
+                                            "example": "Failed to create note"
                                         },
                                         "errors": {
                                             "type": "array",
@@ -3674,7 +3718,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Task not found for this animal"
+                                            "example": "Note not found for this animal"
                                         }
                                     },
                                     "type": "object"
@@ -3726,15 +3770,51 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "title": {
-                                        "description": "Updated title of the note",
+                                    "content": {
+                                        "description": "Updated main content of the note",
                                         "type": "string",
-                                        "example": "Updated Feeding Schedule"
+                                        "example": "Updated meeting notes from the quarterly review"
                                     },
-                                    "description": {
-                                        "description": "Updated description of the note",
+                                    "category": {
+                                        "description": "Updated category of the note",
                                         "type": "string",
-                                        "example": "Feed thrice daily"
+                                        "example": "Business"
+                                    },
+                                    "keywords": {
+                                        "description": "Updated keywords associated with the note",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "meeting",
+                                            "quarterly",
+                                            "review",
+                                            "finances"
+                                        ]
+                                    },
+                                    "file_path": {
+                                        "description": "Updated path to attached file",
+                                        "type": "string",
+                                        "example": "/uploads/documents/meeting_notes_q1.pdf",
+                                        "nullable": true
+                                    },
+                                    "add_to_calendar": {
+                                        "description": "Updated whether to add to calendar",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "description": "Updated status of the note",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "pending",
+                                        "nullable": true
                                     },
                                     "priority": {
                                         "description": "Updated priority level",
@@ -3744,7 +3824,15 @@
                                             "medium",
                                             "high"
                                         ],
-                                        "example": "high"
+                                        "example": "high",
+                                        "nullable": true
+                                    },
+                                    "due_date": {
+                                        "description": "Updated due date for the note",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-04-01",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
