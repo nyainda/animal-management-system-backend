@@ -52,67 +52,23 @@ class NoteController extends Controller
      *         description="List of notes retrieved successfully",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(ref="#/components/schemas/NoteResource")
-     *             ),
-     *             @OA\Property(
-     *                 property="links",
-     *                 type="object",
-     *                 @OA\Property(property="first", type="string", example="http://api.example.com/api/animals/550e8400-e29b-41d4-a716-446655440000/notes?page=1"),
-     *                 @OA\Property(property="last", type="string", example="http://api.example.com/api/animals/550e8400-e29b-41d4-a716-446655440000/notes?page=10"),
-     *                 @OA\Property(property="prev", type="string", nullable=true, example=null),
-     *                 @OA\Property(property="next", type="string", nullable=true, example="http://api.example.com/api/animals/550e8400-e29b-41d4-a716-446655440000/notes?page=2")
-     *             ),
-     *             @OA\Property(
-     *                 property="meta",
-     *                 type="object",
-     *                 @OA\Property(property="current_page", type="integer", example=1),
-     *                 @OA\Property(property="from", type="integer", example=1),
-     *                 @OA\Property(property="last_page", type="integer", example=10),
-     *                 @OA\Property(property="path", type="string", example="http://api.example.com/api/animals/550e8400-e29b-41d4-a716-446655440000/notes"),
-     *                 @OA\Property(property="per_page", type="integer", example=10),
-     *                 @OA\Property(property="to", type="integer", example=10),
-     *                 @OA\Property(property="total", type="integer", example=100)
-     *             ),
-     *             @OA\Property(property="message", type="string", example="Tasks retrieved successfully"),
-     *             @OA\Property(property="status", type="string", example="success")
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/NoteResource")),
+     *             @OA\Property(property="links", type="object", ...),
+     *             @OA\Property(property="meta", type="object", ...)
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - User does not own the animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have access to this animal")
-     *         )
-     *     )
+     *     @OA\Response(response=401, description="Unauthenticated", ...),
+     *     @OA\Response(response=403, description="Forbidden - User does not own the animal", ...)
      * )
      */
     public function index(Animal $animal): JsonResponse
     {
         if ($animal->user_id !== Auth::id()) {
-            return $this->errorResponse(
-                'You do not have access to this animal',
-                Response::HTTP_FORBIDDEN
-            );
+            return $this->errorResponse('You do not have access to this animal', Response::HTTP_FORBIDDEN);
         }
 
-        $notes = $animal->notes()
-            ->latest()
-            ->paginate(10);
-
-        return $this->successResponse(
-            NoteResource::collection($notes),
-            'Tasks retrieved successfully'
-        );
+        $notes = $animal->notes()->latest()->paginate(10);
+        return $this->successResponse(NoteResource::collection($notes), 'Notes retrieved successfully');
     }
 
     /**
@@ -133,59 +89,27 @@ class NoteController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="title", type="string", example="Feeding Schedule", description="Title of the note"),
-     *             @OA\Property(property="description", type="string", example="Feed twice daily", description="Description of the note"),
-     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high"}, example="medium", description="Priority level")
+     *             @OA\Property(property="content", type="string", example="Important meeting notes from the quarterly review", description="Main content of the note"),
+     *             @OA\Property(property="category", type="string", example="Business", description="Category of the note"),
+     *             @OA\Property(property="keywords", type="array", @OA\Items(type="string"), example={"meeting", "quarterly", "review", "finances"}, description="Keywords associated with the note"),
+     *             @OA\Property(property="file_path", type="string", example="/uploads/documents/meeting_notes_q1.pdf", description="Path to attached file", nullable=true),
+     *             @OA\Property(property="add_to_calendar", type="boolean", example=true, description="Whether to add to calendar", nullable=true),
+     *             @OA\Property(property="status", type="string", enum={"pending", "completed", "cancelled"}, example="pending", description="Status of the note", nullable=true),
+     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high"}, example="high", description="Priority level", nullable=true),
+     *             @OA\Property(property="due_date", type="string", format="date", example="2025-04-01", description="Due date for the note", nullable=true)
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Note created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", ref="#/components/schemas/NoteResource"),
-     *             @OA\Property(property="message", type="string", example="Task created successfully"),
-     *             @OA\Property(property="status", type="string", example="success")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - User does not own the animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have access to this animal")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation failed",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to create task"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
-     *         )
-     *     )
+     *     @OA\Response(response=201, description="Note created successfully", ...),
+     *     @OA\Response(response=401, description="Unauthenticated", ...),
+     *     @OA\Response(response=403, description="Forbidden - User does not own the animal", ...),
+     *     @OA\Response(response=422, description="Validation failed", ...),
+     *     @OA\Response(response=500, description="Internal server error", ...)
      * )
      */
     public function store(StoreNoteRequest $request, Animal $animal): JsonResponse
     {
         if ($animal->user_id !== Auth::id()) {
-            return $this->errorResponse(
-                'You do not have access to this animal',
-                Response::HTTP_FORBIDDEN
-            );
+            return $this->errorResponse('You do not have access to this animal', Response::HTTP_FORBIDDEN);
         }
 
         try {
@@ -195,17 +119,9 @@ class NoteController extends Controller
 
             $note = Note::create($validated);
 
-            return $this->successResponse(
-                new NoteResource($note),
-                'Task created successfully',
-                Response::HTTP_CREATED
-            );
+            return $this->successResponse(new NoteResource($note), 'Note created successfully', Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to create task',
-                Response::HTTP_INTERNAL_SERVER_ERROR,
-                [$e->getMessage()]
-            );
+            return $this->errorResponse('Failed to create note', Response::HTTP_INTERNAL_SERVER_ERROR, [$e->getMessage()]);
         }
     }
 
@@ -217,72 +133,25 @@ class NoteController extends Controller
      *     tags={"Notes"},
      *     summary="Get a specific note for an animal",
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(
-     *         name="animal",
-     *         in="path",
-     *         required=true,
-     *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
-     *     ),
-     *     @OA\Parameter(
-     *         name="note",
-     *         in="path",
-     *         required=true,
-     *         description="UUID of the note",
-     *         @OA\Schema(type="string", format="uuid", example="6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Note retrieved successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", ref="#/components/schemas/NoteResource"),
-     *             @OA\Property(property="message", type="string", example="Note retrieved successfully"),
-     *             @OA\Property(property="status", type="string", example="success")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - User does not own the animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have access to this animal")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Note not found for this animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Task not found for this animal")
-     *         )
-     *     )
+     *     @OA\Parameter(name="animal", in="path", required=true, ...),
+     *     @OA\Parameter(name="note", in="path", required=true, ...),
+     *     @OA\Response(response=200, description="Note retrieved successfully", ...),
+     *     @OA\Response(response=401, description="Unauthenticated", ...),
+     *     @OA\Response(response=403, description="Forbidden - User does not own the animal", ...),
+     *     @OA\Response(response=404, description="Note not found for this animal", ...)
      * )
      */
     public function show(Animal $animal, Note $note): JsonResponse
     {
         if ($animal->user_id !== Auth::id()) {
-            return $this->errorResponse(
-                'You do not have access to this animal',
-                Response::HTTP_FORBIDDEN
-            );
+            return $this->errorResponse('You do not have access to this animal', Response::HTTP_FORBIDDEN);
         }
 
         if ($note->animal_id !== $animal->id) {
-            return $this->errorResponse(
-                'Task not found for this animal',
-                Response::HTTP_NOT_FOUND
-            );
+            return $this->errorResponse('Note not found for this animal', Response::HTTP_NOT_FOUND);
         }
 
-        return $this->successResponse(
-            new NoteResource($note),
-            'Note retrieved successfully'
-        );
+        return $this->successResponse(new NoteResource($note), 'Note retrieved successfully');
     }
 
     /**
@@ -293,109 +162,47 @@ class NoteController extends Controller
      *     tags={"Notes"},
      *     summary="Update a specific note for an animal",
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(
-     *         name="animal",
-     *         in="path",
-     *         required=true,
-     *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
-     *     ),
-     *     @OA\Parameter(
-     *         name="note",
-     *         in="path",
-     *         required=true,
-     *         description="UUID of the note",
-     *         @OA\Schema(type="string", format="uuid", example="6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-     *     ),
+     *     @OA\Parameter(name="animal", in="path", required=true, ...),
+     *     @OA\Parameter(name="note", in="path", required=true, ...),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="title", type="string", example="Updated Feeding Schedule", description="Updated title of the note"),
-     *             @OA\Property(property="description", type="string", example="Feed thrice daily", description="Updated description of the note"),
-     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high"}, example="high", description="Updated priority level")
+     *             @OA\Property(property="content", type="string", example="Updated meeting notes from the quarterly review", description="Updated main content of the note"),
+     *             @OA\Property(property="category", type="string", example="Business", description="Updated category of the note"),
+     *             @OA\Property(property="keywords", type="array", @OA\Items(type="string"), example={"meeting", "quarterly", "review", "finances"}, description="Updated keywords associated with the note"),
+     *             @OA\Property(property="file_path", type="string", example="/uploads/documents/meeting_notes_q1.pdf", description="Updated path to attached file", nullable=true),
+     *             @OA\Property(property="add_to_calendar", type="boolean", example=true, description="Updated whether to add to calendar", nullable=true),
+     *             @OA\Property(property="status", type="string", enum={"pending", "completed", "cancelled"}, example="pending", description="Updated status of the note", nullable=true),
+     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high"}, example="high", description="Updated priority level", nullable=true),
+     *             @OA\Property(property="due_date", type="string", format="date", example="2025-04-01", description="Updated due date for the note", nullable=true)
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Note updated successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", ref="#/components/schemas/NoteResource"),
-     *             @OA\Property(property="message", type="string", example="Note updated successfully"),
-     *             @OA\Property(property="status", type="string", example="success")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - User does not own the animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have access to this animal")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Note not found for this animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Note not found for this animal")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation failed",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to update note"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
-     *         )
-     *     )
+     *     @OA\Response(response=200, description="Note updated successfully", ...),
+     *     @OA\Response(response=401, description="Unauthenticated", ...),
+     *     @OA\Response(response=403, description="Forbidden - User does not own the animal", ...),
+     *     @OA\Response(response=404, description="Note not found for this animal", ...),
+     *     @OA\Response(response=422, description="Validation failed", ...),
+     *     @OA\Response(response=500, description="Internal server error", ...)
      * )
      */
     public function update(UpdateNoteRequest $request, Animal $animal, Note $note): JsonResponse
     {
         if ($animal->user_id !== Auth::id()) {
-            return $this->errorResponse(
-                'You do not have access to this animal',
-                Response::HTTP_FORBIDDEN
-            );
+            return $this->errorResponse('You do not have access to this animal', Response::HTTP_FORBIDDEN);
         }
 
         if ($note->animal_id !== $animal->id) {
-            return $this->errorResponse(
-                'Note not found for this animal',
-                Response::HTTP_NOT_FOUND
-            );
+            return $this->errorResponse('Note not found for this animal', Response::HTTP_NOT_FOUND);
         }
 
         try {
             $validated = $request->validated();
-            // Prevent modification of animal_id and user_id
             unset($validated['animal_id'], $validated['user_id']);
-
             $note->update($validated);
 
-            return $this->successResponse(
-                new NoteResource($note),
-                'Note updated successfully'
-            );
+            return $this->successResponse(new NoteResource($note), 'Note updated successfully');
         } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to update note',
-                Response::HTTP_INTERNAL_SERVER_ERROR,
-                [$e->getMessage()]
-            );
+            return $this->errorResponse('Failed to update note', Response::HTTP_INTERNAL_SERVER_ERROR, [$e->getMessage()]);
         }
     }
 
@@ -407,89 +214,30 @@ class NoteController extends Controller
      *     tags={"Notes"},
      *     summary="Delete a specific note for an animal",
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(
-     *         name="animal",
-     *         in="path",
-     *         required=true,
-     *         description="UUID of the animal",
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
-     *     ),
-     *     @OA\Parameter(
-     *         name="note",
-     *         in="path",
-     *         required=true,
-     *         description="UUID of the note",
-     *         @OA\Schema(type="string", format="uuid", example="6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Note deleted successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", type="null"),
-     *             @OA\Property(property="message", type="string", example="Note deleted successfully"),
-     *             @OA\Property(property="status", type="string", example="success")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - User does not own the animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have access to this animal")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Note not found for this animal",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Note not found for this animal")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to delete note"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
-     *         )
-     *     )
+     *     @OA\Parameter(name="animal", in="path", required=true, ...),
+     *     @OA\Parameter(name="note", in="path", required=true, ...),
+     *     @OA\Response(response=200, description="Note deleted successfully", ...),
+     *     @OA\Response(response=401, description="Unauthenticated", ...),
+     *     @OA\Response(response=403, description="Forbidden - User does not own the animal", ...),
+     *     @OA\Response(response=404, description="Note not found for this animal", ...),
+     *     @OA\Response(response=500, description="Internal server error", ...)
      * )
      */
     public function destroy(Animal $animal, Note $note): JsonResponse
     {
         if ($animal->user_id !== Auth::id()) {
-            return $this->errorResponse(
-                'You do not have access to this animal',
-                Response::HTTP_FORBIDDEN
-            );
+            return $this->errorResponse('You do not have access to this animal', Response::HTTP_FORBIDDEN);
         }
 
         if ($note->animal_id !== $animal->id) {
-            return $this->errorResponse(
-                'Note not found for this animal',
-                Response::HTTP_NOT_FOUND
-            );
+            return $this->errorResponse('Note not found for this animal', Response::HTTP_NOT_FOUND);
         }
 
         try {
             $note->delete();
-            return $this->successResponse(
-                null,
-                'Note deleted successfully',
-                Response::HTTP_OK
-            );
+            return $this->successResponse(null, 'Note deleted successfully', Response::HTTP_OK);
         } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to delete note',
-                Response::HTTP_INTERNAL_SERVER_ERROR,
-                [$e->getMessage()]
-            );
+            return $this->errorResponse('Failed to delete note', Response::HTTP_INTERNAL_SERVER_ERROR, [$e->getMessage()]);
         }
     }
 }

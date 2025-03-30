@@ -25,8 +25,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                            "format": "uuid"
                         }
                     },
                     {
@@ -80,7 +79,32 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PaginatedActivityResource"
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ActivityResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -139,8 +163,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                            "format": "uuid"
                         }
                     }
                 ],
@@ -149,6 +172,10 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "activity_type",
+                                    "activity_date"
+                                ],
                                 "properties": {
                                     "activity_type": {
                                         "description": "Type of activity",
@@ -159,7 +186,7 @@
                                         "description": "Date of the activity",
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2025-03-24"
+                                        "example": "2025-03-30"
                                     },
                                     "description": {
                                         "description": "Activity description",
@@ -176,7 +203,7 @@
                                         "description": "Breeding date, if applicable",
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2025-03-24",
+                                        "example": "2025-03-30",
                                         "nullable": true
                                     },
                                     "breeding_notes": {
@@ -290,8 +317,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                            "format": "uuid"
                         }
                     },
                     {
@@ -301,8 +327,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+                            "format": "uuid"
                         }
                     }
                 ],
@@ -384,8 +409,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                            "format": "uuid"
                         }
                     },
                     {
@@ -395,8 +419,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+                            "format": "uuid"
                         }
                     }
                 ],
