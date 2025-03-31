@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $documentationTitle }}</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- Add Laravel CSRF token to meta tag -->
     <link rel="stylesheet" type="text/css" href="{{ l5_swagger_asset($documentation, 'swagger-ui.css') }}">
     <link rel="icon" type="image/png" href="{{ l5_swagger_asset($documentation, 'favicon-32x32.png') }}" sizes="32x32"/>
     <link rel="icon" type="image/png" href="{{ l5_swagger_asset($documentation, 'favicon-16x16.png') }}" sizes="16x16"/>
@@ -183,19 +182,15 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="{{ l5_swagger_asset($documentation, 'swagger-ui-standalone-preset.js') }}"></script>
     <script>
-        window.onload = async function() {
-            // Fetch CSRF token from Laravel Sanctum
-            await fetch('/sanctum/csrf-cookie', {
+        window.onload = function() {
+            // Fetch CSRF cookie on page load
+            fetch('/sanctum/csrf-cookie', {
                 method: 'GET',
-                credentials: 'include', // Ensure cookies are sent and received
-            }).then(response => {
-                if (response.ok) {
-                    console.log('CSRF cookie fetched successfully');
-                } else {
-                    console.error('Failed to fetch CSRF cookie:', response.statusText);
-                }
+                credentials: 'include' // Ensure cookies are sent and received
+            }).then(() => {
+                console.log('CSRF cookie fetched successfully');
             }).catch(err => {
-                console.error('Error fetching CSRF cookie:', err);
+                console.error('Failed to fetch CSRF cookie:', err);
             });
 
             const urls = [];
@@ -213,22 +208,8 @@
                 validatorUrl: {!! isset($validatorUrl) ? '"' . $validatorUrl . '"' : 'null' !!},
                 oauth2RedirectUrl: "{{ route('l5-swagger.'.$documentation.'.oauth2_callback', [], $useAbsolutePath) }}",
                 requestInterceptor: function(request) {
-                    // Add Accept header
-                    request.headers['Accept'] = 'application/json';
-
-                    // Add CSRF token from meta tag or cookie
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content || Cookies.get('XSRF-TOKEN');
-                    if (csrfToken) {
-                        request.headers['X-XSRF-TOKEN'] = csrfToken;
-                        request.headers['X-CSRF-TOKEN'] = csrfToken; // Include both for compatibility
-                    }
-
-                    // Add Authorization header if token exists (after login)
-                    const authToken = localStorage.getItem('auth_token');
-                    if (authToken) {
-                        request.headers['Authorization'] = `Bearer ${authToken}`;
-                    }
-
+                    request.headers['accept'] = 'application/json';
+                    request.headers['X-XSRF-TOKEN'] = Cookies.get('XSRF-TOKEN');
                     return request;
                 },
                 presets: [
@@ -252,22 +233,6 @@
                     usePkceWithAuthorizationCodeGrant: "{!! (bool)config('l5-swagger.defaults.ui.authorization.oauth2.use_pkce_with_authorization_code_grant') !!}"
                 });
             @endif
-
-            // Persist auth token after successful login
-            ui.authActions = {
-                ...ui.authActions,
-                authorize: function(data) {
-                    const token = data['bearerAuth']?.token?.access_token;
-                    if (token) {
-                        localStorage.setItem('auth_token', token);
-                        console.log('Auth token stored:', token);
-                    }
-                },
-                logout: function() {
-                    localStorage.removeItem('auth_token');
-                    console.log('Auth token removed');
-                }
-            };
         }
     </script>
 </body>
