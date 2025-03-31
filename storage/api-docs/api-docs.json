@@ -2,9 +2,9 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Animal Management API",
-        "description": "API for managing animals, including CRUD operations and detailed animal information.",
+        "description": "API for managing animals, including CRUD operations and detailed animal information.\n *      Workflow: First, register and log in to the system. Then, create an animal to generate a unique animal_id (UUID). Use this animal_id to create tasks, notes, and other related data.",
         "contact": {
-            "email": "support@example.com"
+            "email": "oyugibruce@gmail.com"
         },
         "version": "1.0.0"
     },

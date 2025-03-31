@@ -21,9 +21,10 @@ use Illuminate\Support\Arr;
  * @OA\Info(
  *     title="Animal Management API",
  *     version="1.0.0",
- *     description="API for managing animals, including CRUD operations and detailed animal information.",
+ *     description="API for managing animals, including CRUD operations and detailed animal information.
+ *      Workflow: First, register and log in to the system. Then, create an animal to generate a unique animal_id (UUID). Use this animal_id to create tasks, notes, and other related data.",
  *     @OA\Contact(
- *         email="support@example.com"
+ *         email="oyugibruce@gmail.com"
  *     )
  * )
  * @OA\Tag(
