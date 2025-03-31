@@ -394,6 +394,204 @@
                     }
                 ]
             },
+            "put": {
+                "tags": [
+                    "Activities"
+                ],
+                "summary": "Update an existing activity for an animal",
+                "description": "Update an existing activity for an animal.",
+                "operationId": "5561ec3402307c6cd14623167bfc8ebb",
+                "parameters": [
+                    {
+                        "name": "animal",
+                        "in": "path",
+                        "description": "UUID of the animal",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "9e8fb4fd-72f5-482a-9611-0fa9432939e4"
+                        }
+                    },
+                    {
+                        "name": "activity",
+                        "in": "path",
+                        "description": "UUID of the activity to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "9e8fb502-3e59-4080-989e-236634e840d4"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Data to update the activity",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "activity_type",
+                                    "activity_date"
+                                ],
+                                "properties": {
+                                    "activity_type": {
+                                        "description": "Type of activity",
+                                        "type": "string",
+                                        "example": "feeding"
+                                    },
+                                    "activity_date": {
+                                        "description": "Date of the activity",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-03-31"
+                                    },
+                                    "description": {
+                                        "description": "Activity description",
+                                        "type": "string",
+                                        "example": "Updated feeding with grain",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "description": "Additional notes",
+                                        "type": "string",
+                                        "example": "Animal seemed energetic",
+                                        "nullable": true
+                                    },
+                                    "breeding_date": {
+                                        "description": "Breeding date, if applicable",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-03-31",
+                                        "nullable": true
+                                    },
+                                    "breeding_notes": {
+                                        "description": "Breeding-specific notes",
+                                        "type": "string",
+                                        "example": "Updated breeding details",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Activity updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ActivityResource"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Activity updated successfully"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Cannot edit automatic activities",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cannot edit automatic activities"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Activity or animal not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Activity not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "activity_type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The activity type field is required."
+                                                    }
+                                                },
+                                                "activity_date": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The activity date must be a valid date."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Activities"

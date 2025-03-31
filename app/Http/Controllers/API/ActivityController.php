@@ -251,6 +251,108 @@ class ActivityController extends Controller
     }
 
     /**
+ * Update an existing activity for an animal.
+ *
+ * @OA\Put(
+ *     path="/api/animals/{animal}/activities/{activity}",
+ *     tags={"Activities"},
+ *     summary="Update an existing activity for an animal",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(
+ *         name="animal",
+ *         in="path",
+ *         required=true,
+ *         description="UUID of the animal",
+ *         @OA\Schema(type="string", format="uuid", example="9e8fb4fd-72f5-482a-9611-0fa9432939e4")
+ *     ),
+ *     @OA\Parameter(
+ *         name="activity",
+ *         in="path",
+ *         required=true,
+ *         description="UUID of the activity to update",
+ *         @OA\Schema(type="string", format="uuid", example="9e8fb502-3e59-4080-989e-236634e840d4")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         description="Data to update the activity",
+ *         @OA\JsonContent(
+ *             required={"activity_type", "activity_date"},
+ *             @OA\Property(property="activity_type", type="string", example="feeding", description="Type of activity"),
+ *             @OA\Property(property="activity_date", type="string", format="date", example="2025-03-31", description="Date of the activity"),
+ *             @OA\Property(property="description", type="string", nullable=true, example="Updated feeding with grain", description="Activity description"),
+ *             @OA\Property(property="notes", type="string", nullable=true, example="Animal seemed energetic", description="Additional notes"),
+ *             @OA\Property(property="breeding_date", type="string", format="date", nullable=true, example="2025-03-31", description="Breeding date, if applicable"),
+ *             @OA\Property(property="breeding_notes", type="string", nullable=true, example="Updated breeding details", description="Breeding-specific notes")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Activity updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="data", ref="#/components/schemas/ActivityResource", description="Updated activity details"),
+ *             @OA\Property(property="message", type="string", example="Activity updated successfully"),
+ *             @OA\Property(property="status", type="string", example="success")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Unauthenticated")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden - Cannot edit automatic activities",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Cannot edit automatic activities")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Activity or animal not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Activity not found")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation failed",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 @OA\Property(property="activity_type", type="array", @OA\Items(type="string", example="The activity type field is required.")),
+ *                 @OA\Property(property="activity_date", type="array", @OA\Items(type="string", example="The activity date must be a valid date."))
+ *             )
+ *         )
+ *     )
+ * )
+ */
+public function update(CreateActivityRequest $request, Animal $animal, AnimalActivity $activity)
+{
+    // Ensure the activity belongs to the specified animal
+    if ($activity->animal_id !== $animal->id) {
+        return $this->errorResponse('Activity not found for this animal', 404);
+    }
+
+    // Prevent editing automatic activities
+    if ($activity->is_automatic) {
+        return $this->errorResponse('Cannot edit automatic activities', 403);
+    }
+
+    // Validate and update the activity
+    $validatedData = $request->validated();
+    $activity->update($validatedData);
+
+    return $this->successResponse(
+        new ActivityResource($activity),
+        'Activity updated successfully'
+    );
+}
+
+    /**
      * Delete an activity for an animal.
      *
      * @OA\Delete(
@@ -356,6 +458,7 @@ class ActivityController extends Controller
      *     )
      * )
      */
+
     public function generateBirthdayActivities()
     {
         try {

@@ -132,6 +132,7 @@ Route::middleware('api')->group(function () {
             Route::post('/activities', [ActivityController::class, 'store'])->name('animals.activities.store');
             Route::get('/activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
             Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+            Route::put('/activities/{activity}', [ActivityController::class, 'update']);
         });
     });
 });
