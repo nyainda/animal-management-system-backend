@@ -9,7 +9,7 @@ class CreateHealthRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Adjust authorization logic as needed
+        return true;
     }
 
     public function rules(): array
