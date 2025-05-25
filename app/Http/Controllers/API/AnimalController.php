@@ -473,19 +473,19 @@ class AnimalController extends Controller
     /**
      * Generate cache key for index request
      */
-    private function generateCacheKey(Request $request, int $userId): string
-    {
-        $params = [
-            'user' => $userId,
-            'type' => $request->input('type', 'all'),
-            'status' => $request->input('status', 'all'),
-            'breed' => $request->input('breed', 'all'),
-            'gender' => $request->input('gender', 'all'),
-            'search' => $request->input('search', ''),
-            'page' => $request->input('page', 1),
-            'per_page' => $request->input('per_page', self::DEFAULT_PER_PAGE)
-        ];
+    private function generateCacheKey(Request $request, string $userId): string
+{
+    $params = [
+        'user' => $userId,
+        'type' => $request->input('type', 'all'),
+        'status' => $request->input('status', 'all'),
+        'breed' => $request->input('breed', 'all'),
+        'gender' => $request->input('gender', 'all'),
+        'search' => $request->input('search', ''),
+        'page' => $request->input('page', 1),
+        'per_page' => $request->input('per_page', self::DEFAULT_PER_PAGE)
+    ];
 
-        return 'animals_' . md5(serialize($params));
-    }
+    return 'animals_index_' . md5(serialize($params));
+}
 }

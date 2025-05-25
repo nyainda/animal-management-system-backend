@@ -32,8 +32,11 @@ class AnimalService
     /**
      * Get paginated animals with filters
      */
-    public function getPaginatedAnimals(Request $request, int $userId): LengthAwarePaginator
+    public function getPaginatedAnimals(Request $request, int|string $userId): LengthAwarePaginator
     {
+        // Ensure userId is an integer
+        $userId = is_string($userId) ? (int) $userId : $userId;
+
         $query = $this->buildBaseQuery()->forUser($userId);
         $this->applyFilters($query, $request);
 
@@ -45,8 +48,11 @@ class AnimalService
     /**
      * Get animal with full details
      */
-    public function getAnimalWithDetails(string $id, int $userId): array
+    public function getAnimalWithDetails(string $id, int|string $userId): array
     {
+        // Ensure userId is an integer
+        $userId = is_string($userId) ? (int) $userId : $userId;
+
         $animal = $this->buildBaseQuery()
             ->forUser($userId)
             ->findOrFail($id);
@@ -311,8 +317,11 @@ class AnimalService
     /**
      * Get animals summary statistics
      */
-    public function getAnimalsSummary(int $userId): array
+    public function getAnimalsSummary(int|string $userId): array
     {
+        // Ensure userId is an integer
+        $userId = is_string($userId) ? (int) $userId : $userId;
+
         $baseQuery = Animal::forUser($userId);
 
         return [
@@ -332,30 +341,35 @@ class AnimalService
         ];
     }
 
-   /**
- * @param int $userId
- * @param string|null $gender
- */
-public function getBreedingCandidates(int $userId, ?string $gender = null): Collection
-{
-    $query = Animal::forUser($userId)
-        ->where('is_breeding_stock', true)
-        ->where('status', AnimalStatus::ACTIVE->value);
+    /**
+     * Get breeding candidates
+     */
+    public function getBreedingCandidates(int|string $userId, ?string $gender = null): Collection
+    {
+        // Ensure userId is an integer
+        $userId = is_string($userId) ? (int) $userId : $userId;
 
-    if ($gender) {
-        $query->where('gender', $gender);
+        $query = Animal::forUser($userId)
+            ->where('is_breeding_stock', true)
+            ->where('status', AnimalStatus::ACTIVE->value);
+
+        if ($gender) {
+            $query->where('gender', $gender);
+        }
+
+        return $query->select(['id', 'name', 'type', 'breed', 'gender', 'birth_date'])
+            ->orderBy('name')
+            ->get();
     }
-
-    return $query->select(['id', 'name', 'type', 'breed', 'gender', 'birth_date'])
-        ->orderBy('name')
-        ->get();
-}
 
     /**
      * Get animals by type with counts
      */
-    public function getAnimalsByType(int $userId): array
+    public function getAnimalsByType(int|string $userId): array
     {
+        // Ensure userId is an integer
+        $userId = is_string($userId) ? (int) $userId : $userId;
+
         return Animal::forUser($userId)
             ->selectRaw('type, count(*) as count')
             ->groupBy('type')
