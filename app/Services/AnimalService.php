@@ -32,10 +32,14 @@ class AnimalService
     /**
      * Get paginated animals with filters
      */
-    public function getPaginatedAnimals(Request $request, int|string $userId): LengthAwarePaginator
+    public function getPaginatedAnimals(Request $request, mixed $userId): LengthAwarePaginator
     {
-        // Ensure userId is an integer
-        $userId = is_string($userId) ? (int) $userId : $userId;
+        // Ensure userId is an integer - handle various input types
+        $userId = match(true) {
+            is_string($userId) => (int) $userId,
+            is_numeric($userId) => (int) $userId,
+            default => $userId
+        };
 
         $query = $this->buildBaseQuery()->forUser($userId);
         $this->applyFilters($query, $request);
@@ -48,10 +52,14 @@ class AnimalService
     /**
      * Get animal with full details
      */
-    public function getAnimalWithDetails(string $id, int|string $userId): array
+    public function getAnimalWithDetails(string $id, mixed $userId): array
     {
-        // Ensure userId is an integer
-        $userId = is_string($userId) ? (int) $userId : $userId;
+        // Ensure userId is an integer - handle various input types
+        $userId = match(true) {
+            is_string($userId) => (int) $userId,
+            is_numeric($userId) => (int) $userId,
+            default => $userId
+        };
 
         $animal = $this->buildBaseQuery()
             ->forUser($userId)
@@ -317,10 +325,14 @@ class AnimalService
     /**
      * Get animals summary statistics
      */
-    public function getAnimalsSummary(int|string $userId): array
+    public function getAnimalsSummary(mixed $userId): array
     {
-        // Ensure userId is an integer
-        $userId = is_string($userId) ? (int) $userId : $userId;
+        // Ensure userId is an integer - handle various input types
+        $userId = match(true) {
+            is_string($userId) => (int) $userId,
+            is_numeric($userId) => (int) $userId,
+            default => $userId
+        };
 
         $baseQuery = Animal::forUser($userId);
 
@@ -344,10 +356,14 @@ class AnimalService
     /**
      * Get breeding candidates
      */
-    public function getBreedingCandidates(int|string $userId, ?string $gender = null): Collection
+    public function getBreedingCandidates(mixed $userId, ?string $gender = null): Collection
     {
-        // Ensure userId is an integer
-        $userId = is_string($userId) ? (int) $userId : $userId;
+        // Ensure userId is an integer - handle various input types
+        $userId = match(true) {
+            is_string($userId) => (int) $userId,
+            is_numeric($userId) => (int) $userId,
+            default => $userId
+        };
 
         $query = Animal::forUser($userId)
             ->where('is_breeding_stock', true)
@@ -365,10 +381,14 @@ class AnimalService
     /**
      * Get animals by type with counts
      */
-    public function getAnimalsByType(int|string $userId): array
+    public function getAnimalsByType(mixed $userId): array
     {
-        // Ensure userId is an integer
-        $userId = is_string($userId) ? (int) $userId : $userId;
+        // Ensure userId is an integer - handle various input types
+        $userId = match(true) {
+            is_string($userId) => (int) $userId,
+            is_numeric($userId) => (int) $userId,
+            default => $userId
+        };
 
         return Animal::forUser($userId)
             ->selectRaw('type, count(*) as count')
