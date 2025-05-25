@@ -460,13 +460,13 @@ class AnimalController extends Controller
     private function validateIndexRequest(Request $request): void
     {
         $request->validate([
-            'per_page' => 'integer|min:1|max:' . self::MAX_PER_PAGE,
-            'type' => 'string|max:50',
-            'status' => 'string|in:active,sold,deceased',
-            'breed' => 'string|max:50',
-            'gender' => 'string|in:male,female',
-            'search' => 'string|max:100',
-            'page' => 'integer|min:1'
+            'per_page' => 'nullable|integer|min:1|max:' . self::MAX_PER_PAGE,
+            'type' => 'nullable|string|max:50',
+            'status' => 'nullable|string|in:active,sold,deceased',
+            'breed' => 'nullable|string|max:50',
+            'gender' => 'nullable|string|in:male,female',
+            'search' => 'nullable|string|max:100',
+            'page' => 'nullable|integer|min:1'
         ]);
     }
 
