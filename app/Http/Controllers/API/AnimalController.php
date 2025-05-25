@@ -466,7 +466,7 @@ class AnimalController extends Controller
             'breed' => 'nullable|string|max:50',
             'gender' => 'nullable|string|in:male,female',
             'search' => 'nullable|string|max:100',
-            'page' => 'nullable|integer|min:1'
+            //'page' => 'nullable|integer|min:1'
         ]);
     }
 
@@ -482,7 +482,7 @@ class AnimalController extends Controller
             'breed' => $request->input('breed', 'all'),
             'gender' => $request->input('gender', 'all'),
             'search' => $request->input('search', ''),
-            'page' => $request->input('page', 1),
+            //'page' => $request->input('page', 1),
             'per_page' => $request->input('per_page', self::DEFAULT_PER_PAGE)
         ];
 
