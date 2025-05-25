@@ -3,19 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Animal\{
-    StoreAnimalRequest,
-    UpdateAnimalRequest
-};
+use App\Http\Requests\Animal\{StoreAnimalRequest, UpdateAnimalRequest};
 use App\Models\Animal;
+use App\Services\AnimalService;
 use App\Traits\ApiResponse;
 use App\Enums\AnimalStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{DB, Log, Cache, Auth};
-use Illuminate\Support\Arr;
-
-
+use Illuminate\Support\Facades\{Auth, Cache, DB, Log};
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @OA\Info(
@@ -102,8 +99,13 @@ class AnimalController extends Controller
 {
     use ApiResponse;
 
-    private const CACHE_TTL = 300; // 5 minutes
+    private const CACHE_TTL = 30;
     private const DEFAULT_PER_PAGE = 15;
+    private const MAX_PER_PAGE = 100;
+
+    public function __construct(
+        private readonly AnimalService $animalService
+    ) {}
 
     /**
      * @OA\Get(
@@ -115,7 +117,7 @@ class AnimalController extends Controller
      *         in="query",
      *         description="Number of items per page",
      *         required=false,
-     *         @OA\Schema(type="integer", default=15)
+     *         @OA\Schema(type="integer", default=15, maximum=100)
      *     ),
      *     @OA\Parameter(
      *         name="type",
@@ -145,6 +147,13 @@ class AnimalController extends Controller
      *         required=false,
      *         @OA\Schema(type="string", enum={"male", "female"})
      *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by name or tag number",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -166,33 +175,36 @@ class AnimalController extends Controller
      *         )
      *     ),
      *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid parameters"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to index animal"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+     *             @OA\Property(property="message", type="string", example="Failed to retrieve animals"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
     public function index(Request $request): JsonResponse
-    {
-        try {
-            $query = $this->buildAnimalQuery()
-                ->forUser($request->user()->id);
+{
+    $this->validateIndexRequest($request);
 
-            $this->applyFilters($query, $request);
+    $userId = Auth::id();
+    $cacheKey = $this->generateCacheKey($request, $userId);
 
-            $cacheKey = $this->generateCacheKey($request);
-            $animals = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($query, $request) {
-                return $query->paginate($request->input('per_page', self::DEFAULT_PER_PAGE));
-            });
+    $animals = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($request, $userId) {
+        return $this->animalService->getPaginatedAnimals($request, $userId);
+    });
 
-            return $this->successResponse($animals, 'Animals retrieved successfully');
-        } catch (\Exception $e) {
-            return $this->handleException('index', $e, ['user_id' => $request->user()->id]);
-        }
-    }
+    return $this->successResponse($animals, 'Animals retrieved successfully');
+}
 
     /**
      * @OA\Get(
@@ -225,110 +237,90 @@ class AnimalController extends Controller
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to show animal"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+     *             @OA\Property(property="message", type="string", example="Failed to retrieve animal"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
     public function show(string $id): JsonResponse
     {
-        try {
-            $cacheKey = "animal_{$id}_user_" . Auth::id();
-            $animalData = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($id) {
-                $animal = $this->buildAnimalQuery()
-                    ->forUser(Auth::id())
-                    ->findOrFail($id);
+        $userId = Auth::id();
+        $cacheKey = "animal_{$id}_user_{$userId}";
 
-                return $this->formatAnimalResponse($animal);
-            });
+        $animalData = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($id, $userId) {
+            return $this->animalService->getAnimalWithDetails($id, $userId);
+        });
 
-            return $this->successResponse($animalData, 'Animal retrieved successfully');
-        } catch (\Exception $e) {
-            return $this->handleException('show', $e, ['animal_id' => $id, 'user_id' => Auth::id()]);
-        }
+        return $this->successResponse($animalData, 'Animal retrieved successfully');
     }
 
-
-
     /**
- * @OA\Post(
- *     path="/api/animals",
- *     summary="Create a new animal",
- *     tags={"Animals"},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             @OA\Property(property="name", type="string", example="New Animal"),
- *             @OA\Property(property="type", type="string", example="cattle"),
- *             @OA\Property(property="breed", type="string", example="Angus"),
- *             @OA\Property(property="gender", type="string", example="male", enum={"male", "female"}),
- *             @OA\Property(property="birth_date", type="string", format="date", example="2024-01-01"),
- *             @OA\Property(property="birth_time", type="string", format="date-time", example="2024-01-01 08:00:00"),
- *             @OA\Property(property="birth_status", type="string", example="normal"),
- *             @OA\Property(property="health_at_birth", type="string", example="healthy"),
- *             @OA\Property(
- *                 property="relationships",
- *                 type="array",
- *                 @OA\Items(
- *                     type="object",
- *                     @OA\Property(property="related_animal_id", type="string", example="uuid-of-dam"),
- *                     @OA\Property(property="relationship_type", type="string", example="dam", enum={"dam", "sire"}),
- *                     @OA\Property(property="breeding_date", type="string", format="date", example="2023-04-01"),
- *                     @OA\Property(property="breeding_notes", type="string", example="Natural breeding")
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=201,
- *         description="Animal created",
- *         @OA\JsonContent(
- *             @OA\Property(property="data", ref="#/components/schemas/AnimalWithDetails"),
- *             @OA\Property(property="message", type="string", example="Animal created successfully")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="The given data was invalid"),
- *             @OA\Property(property="errors", type="object")
- *         )
- *     ),
- *     @OA\Response(
- *         response=500,
- *         description="Server error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Failed to store animal"),
- *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
- *         )
- *     )
- * )
- */
-
-      public function store(StoreAnimalRequest $request): JsonResponse
+     * @OA\Post(
+     *     path="/api/animals",
+     *     summary="Create a new animal",
+     *     tags={"Animals"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="New Animal"),
+     *             @OA\Property(property="type", type="string", example="cattle"),
+     *             @OA\Property(property="breed", type="string", example="Angus"),
+     *             @OA\Property(property="gender", type="string", example="male", enum={"male", "female"}),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="2024-01-01"),
+     *             @OA\Property(property="birth_time", type="string", format="date-time", example="2024-01-01 08:00:00"),
+     *             @OA\Property(property="birth_status", type="string", example="normal"),
+     *             @OA\Property(property="health_at_birth", type="string", example="healthy"),
+     *             @OA\Property(
+     *                 property="relationships",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="related_animal_id", type="string", example="uuid-of-dam"),
+     *                     @OA\Property(property="relationship_type", type="string", example="dam", enum={"dam", "sire"}),
+     *                     @OA\Property(property="breeding_date", type="string", format="date", example="2023-04-01"),
+     *                     @OA\Property(property="breeding_notes", type="string", example="Natural breeding")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Animal created",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", ref="#/components/schemas/AnimalWithDetails"),
+     *             @OA\Property(property="message", type="string", example="Animal created successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Failed to create animal"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     )
+     * )
+     */
+    public function store(StoreAnimalRequest $request): JsonResponse
     {
-        try {
-            return DB::transaction(function () use ($request) {
-                $validatedData = $this->prepareValidatedData($request->validated());
-                $animal = Animal::create($validatedData);
+        return DB::transaction(function () use ($request) {
+            $animalData = $this->animalService->createAnimal($request);
 
-                $this->handleBirthDetails($animal, $request->validatedBirthDetails());
-                $animal->load('birthDetail');
-
-                return $this->successResponse(
-                    $this->mergeAnimalWithBirthDetails($animal),
-                    'Animal created successfully',
-                    201
-                );
-            });
-        } catch (\Exception $e) {
-            return $this->handleException('store', $e, [
-                'user_id' => $request->user()->id,
-                'request_data' => $request->all()
-            ]);
-        }
+            return $this->successResponse(
+                $animalData,
+                'Animal created successfully',
+                201
+            );
+        });
     }
 
     /**
@@ -394,36 +386,22 @@ class AnimalController extends Controller
      *         description="Server error",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="Failed to update animal"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
     public function update(UpdateAnimalRequest $request, string $id): JsonResponse
     {
-        try {
-            $animal = Animal::forUser(Auth::id())->findOrFail($id);
+        return DB::transaction(function () use ($request, $id) {
+            $animalData = $this->animalService->updateAnimal($request, $id);
 
-            return DB::transaction(function () use ($request, $animal) {
-                $validatedData = $this->prepareValidatedData($request->validated());
-                $this->logStatusChange($animal, $validatedData);
-                $animal->update($validatedData);
+            // Clear cache
+            $userId = Auth::id();
+            Cache::forget("animal_{$id}_user_{$userId}");
 
-                $this->handleBirthDetails($animal, $request->validatedBirthDetails());
-                $animal->refresh();
-
-                return $this->successResponse(
-                    $this->formatAnimalResponse($animal),
-                    'Animal updated successfully'
-                );
-            });
-        } catch (\Exception $e) {
-            return $this->handleException('update', $e, [
-                'animal_id' => $id,
-                'user_id' => Auth::id(),
-                'request_data' => $request->validated()
-            ]);
-        }
+            return $this->successResponse($animalData, 'Animal updated successfully');
+        });
     }
 
     /**
@@ -457,140 +435,57 @@ class AnimalController extends Controller
      *         response=500,
      *         description="Server error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to destroy animal"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+     *             @OA\Property(property="message", type="string", example="Failed to delete animal"),
+     *             @OA\Property(property="error", type="string")
      *         )
      *     )
      * )
      */
     public function destroy(string $id): JsonResponse
     {
-        try {
-            $animal = Animal::forUser(Auth::id())->findOrFail($id);
+        return DB::transaction(function () use ($id) {
+            $this->animalService->deleteAnimal($id);
 
-            DB::transaction(function () use ($animal) {
-                optional($animal->birthDetail)->delete();
-                $animal->delete();
-            });
+            // Clear cache
+            $userId = Auth::id();
+            Cache::forget("animal_{$id}_user_{$userId}");
 
-            Cache::forget("animal_{$id}_user_" . Auth::id());
             return $this->successResponse(null, 'Animal deleted successfully');
-        } catch (\Exception $e) {
-            return $this->handleException('destroy', $e, ['animal_id' => $id, 'user_id' => Auth::id()]);
-        }
+        });
     }
 
-    // Private methods remain unchanged...
-    private function buildAnimalQuery()
+    /**
+     * Validate index request parameters
+     */
+    private function validateIndexRequest(Request $request): void
     {
-        return Animal::query()
-            ->select([
-                'id', 'name', 'type', 'breed', 'status',
-                'tag_number', 'birth_date', 'gender',
-                'weight', 'height', 'is_breeding_stock', 'internal_id'
-            ])
-            ->with([
-                'birthDetail:id,animal_id,birth_weight,birth_status,health_at_birth',
-                'damRelationship:id,animal_id,related_animal_id',
-                'sireRelationship:id,animal_id,related_animal_id',
-                'damRelationship.relatedAnimal:id,name,type,gender,birth_date',
-                'sireRelationship.relatedAnimal:id,name,type,gender,birth_date',
-            ]);
-    }
-
-    private function applyFilters($query, Request $request): void
-    {
-        $filters = ['type', 'status', 'breed', 'gender'];
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, $request->input($filter));
-            }
-        }
-    }
-
-    private function generateCacheKey(Request $request): string
-    {
-        return sprintf(
-            'animals_user_%s_type_%s_status_%s_page_%s_perpage_%s',
-            $request->user()->id,
-            $request->input('type', 'all'),
-            $request->input('status', 'all'),
-            $request->input('page', 1),
-            $request->input('per_page', self::DEFAULT_PER_PAGE)
-        );
-    }
-
-    private function prepareValidatedData(array $data): array
-    {
-        $data['user_id'] = Auth::id();
-        if (isset($data['status'])) {
-            $status = AnimalStatus::tryFromCaseInsensitive($data['status']);
-            $data['status'] = $status ? $status->value : AnimalStatus::ACTIVE->value;
-        }
-        return $data;
-    }
-
-    private function handleBirthDetails(Animal $animal, ?array $birthDetails): void
-    {
-        if ($birthDetails) {
-            $animal->birthDetail()->updateOrCreate(
-                ['animal_id' => $animal->id],
-                $birthDetails
-            );
-        }
-    }
-
-    private function formatAnimalResponse(Animal $animal): array
-    {
-        $data = $this->mergeAnimalWithDetails($animal);
-        $data['status_group'] = $animal->status->getGroup();
-        $data['status_color'] = $animal->status->getStatusColor();
-        $data['status_action'] = $animal->status->requiresAction();
-        return $data;
-    }
-
-    private function mergeAnimalWithBirthDetails(Animal $animal): array
-    {
-        $animalData = $animal->toArray();
-        return array_merge($animalData, Arr::pull($animalData, 'birth_detail', []));
-    }
-
-    private function mergeAnimalWithDetails(Animal $animal): array
-    {
-        $animalData = $this->mergeAnimalWithBirthDetails($animal);
-        $animalData['dam'] = optional($animal->dam())->only(['id', 'name', 'type', 'gender', 'birth_date']);
-        $animalData['sire'] = optional($animal->sire())->only(['id', 'name', 'type', 'gender', 'birth_date']);
-        $animalData['offspring'] = $animal->offspring()->map->only([
-            'id', 'name', 'type', 'gender', 'birth_date'
+        $request->validate([
+            'per_page' => 'integer|min:1|max:' . self::MAX_PER_PAGE,
+            'type' => 'string|max:50',
+            'status' => 'string|in:active,sold,deceased',
+            'breed' => 'string|max:50',
+            'gender' => 'string|in:male,female',
+            'search' => 'string|max:100',
+            'page' => 'integer|min:1'
         ]);
-
-        return $animalData;
     }
 
-    private function logStatusChange(Animal $animal, array $data): void
+    /**
+     * Generate cache key for index request
+     */
+    private function generateCacheKey(Request $request, int $userId): string
     {
-        if (isset($data['status']) && $animal->status->value !== $data['status']) {
-            Log::info("Animal Status Transition", [
-                'animal_id' => $animal->id,
-                'from_status' => $animal->status->value,
-                'to_status' => $data['status'],
-                'user_id' => Auth::id()
-            ]);
-        }
-    }
+        $params = [
+            'user' => $userId,
+            'type' => $request->input('type', 'all'),
+            'status' => $request->input('status', 'all'),
+            'breed' => $request->input('breed', 'all'),
+            'gender' => $request->input('gender', 'all'),
+            'search' => $request->input('search', ''),
+            'page' => $request->input('page', 1),
+            'per_page' => $request->input('per_page', self::DEFAULT_PER_PAGE)
+        ];
 
-    private function handleException(string $method, \Exception $e, array $context): JsonResponse
-    {
-        DB::rollBack();
-        Log::error("Animal {$method} Error", array_merge($context, [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]));
-
-        return $this->errorResponse(
-            "Failed to {$method} animal",
-            500,
-            ['error' => $e->getMessage()]
-        );
+        return 'animals_' . md5(serialize($params));
     }
 }
